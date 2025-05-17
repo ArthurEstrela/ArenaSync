@@ -1,4 +1,4 @@
-package com.ajs.arenasync.Resources;
+package com.ajs.arenasync.Controller;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import com.ajs.arenasync.Services.LocationPlatformService;
 
 @RestController
 @RequestMapping("/location-platforms")
-public class LocationPlatformResource {
+public class LocationPlatformController {
 
     @Autowired
     private LocationPlatformService locationPlatformService;

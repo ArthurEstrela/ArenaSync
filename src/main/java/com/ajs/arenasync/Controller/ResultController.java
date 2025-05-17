@@ -1,4 +1,4 @@
-package com.ajs.arenasync.Resources;
+package com.ajs.arenasync.Controller;
 
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,7 @@ import com.ajs.arenasync.Services.ResultService;
 
 @RestController
 @RequestMapping("/results")
-public class ResultResource {
+public class ResultController {
 
     @Autowired
     private ResultService resultService;

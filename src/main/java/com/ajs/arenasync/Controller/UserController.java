@@ -1,4 +1,4 @@
-package com.ajs.arenasync.Resources;
+package com.ajs.arenasync.Controller;
 
 import java.util.Optional;
 
@@ -19,7 +19,7 @@ import com.ajs.arenasync.Services.UserService;
 
 @RestController
 @RequestMapping("/users")
-public class UserResource {
+public class UserController {
 
     @Autowired
     private UserService userService;

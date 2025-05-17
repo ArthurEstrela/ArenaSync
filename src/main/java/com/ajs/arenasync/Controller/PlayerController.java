@@ -1,4 +1,4 @@
-package com.ajs.arenasync.Resources;
+package com.ajs.arenasync.Controller;
 
 import java.util.Optional;
 
@@ -13,42 +13,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ajs.arenasync.Entities.Tournament;
-import com.ajs.arenasync.Services.TournamentService;
+import com.ajs.arenasync.Entities.Player;
+import com.ajs.arenasync.Services.PlayerService;
 
 @RestController
-@RequestMapping("/tournaments")
-public class TournamentResource {
+@RequestMapping("/players")
+public class PlayerController {
 
     @Autowired
-    private TournamentService tournamentService;
+    private PlayerService playerService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tournament> findById(@PathVariable Long id) {
-        Optional<Tournament> obj = tournamentService.findById(id);
+    public ResponseEntity<Player> findById(@PathVariable Long id) {
+        Optional<Player> obj = playerService.findById(id);
         return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Tournament> insert(@RequestBody Tournament tournament) {
-        Tournament savedTournament = tournamentService.save(tournament);
-        return ResponseEntity.ok(savedTournament);
+    public ResponseEntity<Player> insert(@RequestBody Player player) {
+        Player savedPlayer = playerService.save(player);
+        return ResponseEntity.ok(savedPlayer);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tournament> update(@PathVariable Long id, @RequestBody Tournament tournament) {
-        Optional<Tournament> obj = tournamentService.findById(id);
+    public ResponseEntity<Player> update(@PathVariable Long id, @RequestBody Player player) {
+        Optional<Player> obj = playerService.findById(id);
         if (obj.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        tournament.setId(id);
-        Tournament updatedTournament = tournamentService.save(tournament);
-        return ResponseEntity.ok(updatedTournament);
+        player.setId(id);
+        Player updatedPlayer = playerService.save(player);
+        return ResponseEntity.ok(updatedPlayer);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        tournamentService.deleteById(id);
+        playerService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 

@@ -1,4 +1,4 @@
-package com.ajs.arenasync.Resources;
+package com.ajs.arenasync.Controller;
 
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ import com.ajs.arenasync.Services.TeamService;
 
 @RestController
 @RequestMapping("/teams")
-public class TeamResource {
+public class TeamController {
 
     @Autowired
     private TeamService teamService;
