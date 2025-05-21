@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.ajs.arenasync.Entities.Enums.TournamentStatus;
 import com.ajs.arenasync.Entities.Enums.TournamentType;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,21 +20,24 @@ import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
-public class Tournament implements Serializable{
+public class Tournament implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "O nome é obrigatório")  // Não pode ser nulo ou vazio
+    @NotBlank(message = "O nome é obrigatório") // Não pode ser nulo ou vazio
     private String name;
-    @NotBlank(message = "O tipo é obrigatório")  // Não pode ser nulo ou vazio
+    @NotBlank(message = "O tipo é obrigatório") // Não pode ser nulo ou vazio
     private TournamentType type;
-    @NotBlank(message = "A modalidade é obrigatório")  // Não pode ser nulo ou vazio
+    @NotBlank(message = "A modalidade é obrigatório") // Não pode ser nulo ou vazio
     private String modality;
     private String rules;
     private Date startDate;
     private Date endDate;
+
+    @Enumerated(EnumType.STRING)
+    private TournamentStatus status;
 
     @OneToMany(mappedBy = "tournament")
     private List<Enrollment> enrollments = new ArrayList<>();
@@ -103,6 +109,14 @@ public class Tournament implements Serializable{
 
     public void setRules(String rules) {
         this.rules = rules;
+    }
+
+    public TournamentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TournamentStatus status) {
+        this.status = status;
     }
 
     public Date getStartDate() {

@@ -27,7 +27,7 @@ public class ResultController {
     }
 
     @PutMapping("/{id}")
-public ResponseEntity<Result> update(@PathVariable Long id, @RequestBody Result result) {
+    public ResponseEntity<Result> update(@PathVariable Long id, @RequestBody Result result) {
     Optional<Result> obj = resultService.findById(id);
     if (obj.isEmpty()) {
         return ResponseEntity.notFound().build();

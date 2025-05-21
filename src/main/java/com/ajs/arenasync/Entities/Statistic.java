@@ -10,14 +10,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class Statistic implements Serializable{
+public class Statistic implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer points;
+    private Integer score;
     private Integer assists;
+    private Integer gamesPlayed;
     private Integer wins;
     private Integer losses;
 
@@ -32,11 +33,12 @@ public class Statistic implements Serializable{
     public Statistic() {
     }
 
-    public Statistic(Long id, Integer points, Integer assists, Integer wins, Integer losses, Player player,
-            Match match) {
+    public Statistic(Long id, Integer score, Integer assists, Integer gamesPlayed, Integer wins, Integer losses,
+            Player player, Match match) {
         this.id = id;
-        this.points = points;
+        this.score = score;
         this.assists = assists;
+        this.gamesPlayed = gamesPlayed;
         this.wins = wins;
         this.losses = losses;
         this.player = player;
@@ -51,12 +53,20 @@ public class Statistic implements Serializable{
         this.id = id;
     }
 
-    public Integer getPoints() {
-        return points;
+    public Integer getScore() {
+        return score;
     }
 
-    public void setPoints(Integer points) {
-        this.points = points;
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public Integer getGamesPlayed() {
+        return gamesPlayed;
+    }
+
+    public void setGamesPlayed(Integer gamesPlayed) {
+        this.gamesPlayed = gamesPlayed;
     }
 
     public Integer getAssists() {

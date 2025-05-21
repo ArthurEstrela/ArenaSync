@@ -1,8 +1,11 @@
 package com.ajs.arenasync.Controller;
 
+import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,23 +28,20 @@ public class PlayerController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Player> findById(@PathVariable Long id) {
-        Optional<Player> obj = playerService.findById(id);
-        return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        Player obj = playerService.findById(id);
+        return ResponseEntity.ok(obj); // Já lança exceção se não achar
     }
 
     @PostMapping
     public ResponseEntity<Player> insert(@RequestBody Player player) {
         Player savedPlayer = playerService.save(player);
-        return ResponseEntity.ok(savedPlayer);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPlayer); // 201 Created
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Player> update(@PathVariable Long id, @RequestBody Player player) {
-        Optional<Player> obj = playerService.findById(id);
-        if (obj.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        player.setId(id);
+        Player existingPlayer = playerService.findById(id); // Lança exceção se não encontrar
+        player.setId(existingPlayer.getId());
         Player updatedPlayer = playerService.save(player);
         return ResponseEntity.ok(updatedPlayer);
     }
@@ -49,7 +49,12 @@ public class PlayerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         playerService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
+    @GetMapping("/free-agents")
+    public ResponseEntity<List<Player>> getFreeAgents() {
+        List<Player> freeAgents = playerService.getFreeAgents();
+        return ResponseEntity.ok(freeAgents);
+    }
 }

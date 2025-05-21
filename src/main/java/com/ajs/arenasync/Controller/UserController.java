@@ -24,35 +24,35 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    // Buscar por ID
     @GetMapping("/{id}")
     public ResponseEntity<User> findById(@PathVariable Long id) {
-        Optional<User> obj = userService.findById(id);
-        return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        User user = userService.findById(id);
+        return ResponseEntity.ok(user);
     }
 
+    // Buscar por e-mail
     @GetMapping("/email")
     public ResponseEntity<User> findByEmail(@RequestParam String email) {
-        Optional<User> obj = userService.findByEmail(email);
-        return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        User user = userService.findByEmail(email);
+        return ResponseEntity.ok(user);
     }
 
+    // Criar novo usuário
     @PostMapping
     public ResponseEntity<User> insert(@RequestBody User user) {
         User savedUser = userService.save(user);
         return ResponseEntity.ok(savedUser);
     }
 
+    // Atualizar usuário
     @PutMapping("/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
-        Optional<User> obj = userService.findById(id);
-        if (obj.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        user.setId(id);
-        User updatedUser = userService.save(user);
+        User updatedUser = userService.update(id, user);
         return ResponseEntity.ok(updatedUser);
     }
 
+    // Deletar usuário
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         userService.deleteById(id);

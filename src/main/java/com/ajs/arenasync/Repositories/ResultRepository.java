@@ -10,6 +10,6 @@ import com.ajs.arenasync.Entities.Result;
 @Repository
 public interface ResultRepository extends JpaRepository<Result, Long> {
 
-    Optional<Result> findByMatchId(Long matchId);
+    Result findByMatchId(Long matchId);
 }
 

@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ajs.arenasync.Entities.Enums.Role;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -27,13 +25,13 @@ public class User implements Serializable {
     private Long id;
     @NotBlank(message = "O nome é obrigatório")
     private String name;
+    @NotBlank(message = "A idade é obrigatório")
+    private Integer age;
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
     private String password;
     @Email(message = "Email inválido")
     @Column(unique = true)
     private String email;
-    @Enumerated(EnumType.STRING)
-    private Role role;
 
     @OneToMany(mappedBy = "organizer")
     private List<Tournament> tournaments = new ArrayList<>();
@@ -41,15 +39,18 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user")
     private List<Review> reviews = new ArrayList<>();
 
+    public User() {
+    }
+
     public User(Long id, @NotBlank(message = "O nome é obrigatório") String name,
+            @NotBlank(message = "A idade é obrigatório") Integer age,
             @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres") String password,
-            @Email(message = "Email inválido") String email, Role role, List<Tournament> tournaments,
-            List<Review> reviews) {
+            @Email(message = "Email inválido") String email, List<Tournament> tournaments, List<Review> reviews) {
         this.id = id;
         this.name = name;
+        this.age = age;
         this.password = password;
         this.email = email;
-        this.role = role;
         this.tournaments = tournaments;
         this.reviews = reviews;
     }
@@ -70,6 +71,14 @@ public class User implements Serializable {
         this.name = name;
     }
 
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -84,14 +93,6 @@ public class User implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public List<Tournament> getTournaments() {

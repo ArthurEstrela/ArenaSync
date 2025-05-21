@@ -15,5 +15,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     List<Enrollment> findByTeamId(Long teamId);
 
-    Optional<Enrollment> findByTournamentIdAndTeamId(Long tournamentId, Long teamId);
+    Enrollment findByTournamentIdAndTeamId(Long tournamentId, Long teamId);
 }

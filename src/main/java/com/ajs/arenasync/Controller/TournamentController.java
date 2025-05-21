@@ -1,5 +1,6 @@
 package com.ajs.arenasync.Controller;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ajs.arenasync.Entities.Tournament;
+import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.ajs.arenasync.Services.TournamentService;
 
 @RestController
@@ -24,23 +26,21 @@ public class TournamentController {
     private TournamentService tournamentService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Tournament> findById(@PathVariable Long id) {
-        Optional<Tournament> obj = tournamentService.findById(id);
-        return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Tournament> getById(@PathVariable Long id) {
+        Tournament tournament = tournamentService.findById(id); // exceção tratada no service
+        return ResponseEntity.ok(tournament);
     }
 
     @PostMapping
-    public ResponseEntity<Tournament> insert(@RequestBody Tournament tournament) {
+    public ResponseEntity<Tournament> create(@RequestBody Tournament tournament) {
         Tournament savedTournament = tournamentService.save(tournament);
-        return ResponseEntity.ok(savedTournament);
+        URI location = URI.create("/tournaments/" + savedTournament.getId());
+        return ResponseEntity.created(location).body(savedTournament);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Tournament> update(@PathVariable Long id, @RequestBody Tournament tournament) {
-        Optional<Tournament> obj = tournamentService.findById(id);
-        if (obj.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        tournamentService.findById(id); // valida se existe
         tournament.setId(id);
         Tournament updatedTournament = tournamentService.save(tournament);
         return ResponseEntity.ok(updatedTournament);
@@ -48,8 +48,8 @@ public class TournamentController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
+        tournamentService.findById(id); // valida se existe
         tournamentService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -8,7 +8,11 @@ import org.springframework.stereotype.Repository;
 import com.ajs.arenasync.Entities.Player;
 
 @Repository
-public interface PlayerRepository extends JpaRepository<Player, Long>{
+public interface PlayerRepository extends JpaRepository<Player, Long> {
 
-List<Player> findByTeamId(Long teamId);
+    List<Player> findByTeamId(Long teamId);
+
+    boolean existsByEmail(String email);
+
+    List<Player> findByTeamIsNull();
 }
