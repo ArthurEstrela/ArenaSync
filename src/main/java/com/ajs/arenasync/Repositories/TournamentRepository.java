@@ -1,4 +1,5 @@
 package com.ajs.arenasync.Repositories;
+
 //Concluída
 import java.time.LocalDate;
 import java.util.Date;
