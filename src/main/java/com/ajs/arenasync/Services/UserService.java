@@ -1,5 +1,6 @@
 package com.ajs.arenasync.Services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,47 +17,56 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // Buscar usuário por ID com tratamento de erro
-    public User findById(Long id) {
+    // Buscar usuário por ID
+    public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário", id));
+            .orElseThrow(() -> new ResourceNotFoundException("User", id));
     }
 
-    // Buscar por email com validação
-    public User findByEmail(String email) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new ResourceNotFoundException("Usuário com e-mail " + email + " não encontrado.");
-        }
-        return user;
+    // Buscar usuário por e-mail
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 
-    // Salvar usuário com regra de email único
-    public User save(User user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new BusinessException("E-mail é obrigatório.");
-        }
+    // Listar todos os usuários
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
-        Optional<User> existingUser = Optional.ofNullable(userRepository.findByEmail(user.getEmail()));
-        if (existingUser.isPresent() && !existingUser.get().getId().equals(user.getId())) {
-            throw new BusinessException("Já existe um usuário cadastrado com esse e-mail.");
+    // Criar novo usuário com validação de e-mail único
+    public User createUser(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new BusinessException("Já existe um usuário com este e-mail.");
         }
 
         return userRepository.save(user);
     }
 
-    public void deleteById(Long id) {
-        User user = findById(id);
-        userRepository.deleteById(user.getId());
-    }
-
-    public User update(Long id, User user) {
+    // Atualizar usuário com validações
+    public User updateUser(Long id, User updatedUser) {
         User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário", id));
+            .orElseThrow(() -> new ResourceNotFoundException("User", id));
 
-        existingUser.setName(user.getName());
-        existingUser.setEmail(user.getEmail());
+        // Se o novo e-mail for diferente e já existir no sistema, dá erro
+        if (!existingUser.getEmail().equals(updatedUser.getEmail()) &&
+            userRepository.existsByEmail(updatedUser.getEmail())) {
+            throw new BusinessException("Este e-mail já está em uso por outro usuário.");
+        }
+
+        existingUser.setName(updatedUser.getName());
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setPassword(updatedUser.getPassword());
+        existingUser.setAge(updatedUser.getAge());
 
         return userRepository.save(existingUser);
+    }
+
+    // Deletar usuário
+    public void deleteUser(Long id) {
+        User existingUser = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User", id));
+
+        userRepository.delete(existingUser);
     }
 }

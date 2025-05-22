@@ -154,6 +154,11 @@ public class Tournament implements Serializable {
     public User getOrganizer() {
         return organizer;
     }
+   
+
+    public void setOrganizer(User organizer) {
+        this.organizer = organizer;
+    }
 
     @Override
     public int hashCode() {

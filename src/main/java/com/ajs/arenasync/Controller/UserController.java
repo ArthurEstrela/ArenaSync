@@ -1,18 +1,10 @@
 package com.ajs.arenasync.Controller;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
 import com.ajs.arenasync.Entities.User;
 import com.ajs.arenasync.Services.UserService;
@@ -24,39 +16,44 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // Buscar por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<User> findById(@PathVariable Long id) {
-        User user = userService.findById(id);
-        return ResponseEntity.ok(user);
-    }
-
-    // Buscar por e-mail
-    @GetMapping("/email")
-    public ResponseEntity<User> findByEmail(@RequestParam String email) {
-        User user = userService.findByEmail(email);
-        return ResponseEntity.ok(user);
-    }
-
-    // Criar novo usuário
+    // Criar usuário
     @PostMapping
-    public ResponseEntity<User> insert(@RequestBody User user) {
-        User savedUser = userService.save(user);
-        return ResponseEntity.ok(savedUser);
+    public ResponseEntity<User> create(@RequestBody User user) {
+        User created = userService.createUser(user);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    // Buscar usuário por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getById(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
+    // Buscar usuário por e-mail
+    @GetMapping("/email")
+    public ResponseEntity<User> getByEmail(@RequestParam String email) {
+        User user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(user);
+    }
+
+    // Listar todos os usuários
+    @GetMapping
+    public ResponseEntity<List<User>> getAll() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     // Atualizar usuário
     @PutMapping("/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
-        User updatedUser = userService.update(id, user);
-        return ResponseEntity.ok(updatedUser);
+        User updated = userService.updateUser(id, user);
+        return ResponseEntity.ok(updated);
     }
 
     // Deletar usuário
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userService.deleteById(id);
+        userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-
 }

@@ -1,45 +1,52 @@
 package com.ajs.arenasync.Controller;
 
-import java.util.Optional;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+
 import com.ajs.arenasync.Entities.LocationPlatform;
 import com.ajs.arenasync.Services.LocationPlatformService;
 
 @RestController
-@RequestMapping("/location-platforms")
+@RequestMapping("/locations")
 public class LocationPlatformController {
 
     @Autowired
     private LocationPlatformService locationPlatformService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<LocationPlatform> findById(@PathVariable Long id) {
-        Optional<LocationPlatform> obj = locationPlatformService.findById(id);
-        return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
+    // Criar local ou plataforma
     @PostMapping
-    public ResponseEntity<LocationPlatform> insert(@RequestBody LocationPlatform locationPlatform) {
-        LocationPlatform savedLocationPlatform = locationPlatformService.save(locationPlatform);
-        return ResponseEntity.ok(savedLocationPlatform);
+    public ResponseEntity<LocationPlatform> create(@RequestBody LocationPlatform locationPlatform) {
+        LocationPlatform created = locationPlatformService.create(locationPlatform);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
+    // Buscar por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<LocationPlatform> getById(@PathVariable Long id) {
+        LocationPlatform location = locationPlatformService.findById(id);
+        return ResponseEntity.ok(location);
+    }
+
+    // Listar todos
+    @GetMapping
+    public ResponseEntity<List<LocationPlatform>> getAll() {
+        return ResponseEntity.ok(locationPlatformService.findAll());
+    }
+
+    // Atualizar
     @PutMapping("/{id}")
-public ResponseEntity<LocationPlatform> update(@PathVariable Long id, @RequestBody LocationPlatform locationPlatform) {
-    Optional<LocationPlatform> obj = locationPlatformService.findById(id);
-    if (obj.isEmpty()) {
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<LocationPlatform> update(@PathVariable Long id, @RequestBody LocationPlatform updatedData) {
+        LocationPlatform updated = locationPlatformService.update(id, updatedData);
+        return ResponseEntity.ok(updated);
     }
-    locationPlatform.setId(id);
-    LocationPlatform updatedLocationPlatform = locationPlatformService.save(locationPlatform);
-    return ResponseEntity.ok(updatedLocationPlatform);
-}
 
+    // Deletar
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        locationPlatformService.deleteById(id);
+        locationPlatformService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

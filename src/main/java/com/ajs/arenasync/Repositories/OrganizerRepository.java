@@ -1,5 +1,5 @@
 package com.ajs.arenasync.Repositories;
-
+//Concluída
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +18,8 @@ public interface OrganizerRepository extends JpaRepository<Organizer, Long> {
     List<Organizer> findByOrganizationNameContainingIgnoreCase(String organizationName);
 
     // Buscar por e-mail (usado em login ou validação)
-    Organizer findByEmail(String email);
+    Optional<Organizer> findByEmail(String email);
+
 
     // Verificar se já existe um telefone cadastrado (evita duplicidade)
     boolean existsByPhoneNumber(String phoneNumber);

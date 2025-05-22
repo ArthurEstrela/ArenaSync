@@ -1,44 +1,54 @@
 package com.ajs.arenasync.Controller;
 
-import java.util.Optional;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import com.ajs.arenasync.Entities.Result;
 import com.ajs.arenasync.Services.ResultService;
 
 @RestController
-@RequestMapping("/results")
+@RequestMapping("/api/results")
 public class ResultController {
 
     @Autowired
     private ResultService resultService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Result> findById(@PathVariable Long id) {
-        Optional<Result> obj = resultService.findById(id);
-        return obj.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
+    // 🔹 Criar um novo resultado
     @PostMapping
-    public ResponseEntity<Result> insert(@RequestBody Result result) {
+    public ResponseEntity<Result> createResult(@RequestBody Result result) {
         Result savedResult = resultService.save(result);
         return ResponseEntity.ok(savedResult);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Result> update(@PathVariable Long id, @RequestBody Result result) {
-    Optional<Result> obj = resultService.findById(id);
-    if (obj.isEmpty()) {
-        return ResponseEntity.notFound().build();
+    // 🔹 Buscar resultado por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Result> getResultById(@PathVariable Long id) {
+        Result result = resultService.findById(id);
+        return ResponseEntity.ok(result);
     }
-    result.setId(id);
-    Result updatedResult = resultService.save(result);
-    return ResponseEntity.ok(updatedResult);
-}
 
+    // 🔹 Listar todos os resultados
+    @GetMapping
+    public ResponseEntity<List<Result>> getAllResults() {
+        List<Result> results = resultService.findAll();
+        return ResponseEntity.ok(results);
+    }
+
+    // 🔹 Atualizar um resultado
+    @PutMapping("/{id}")
+    public ResponseEntity<Result> updateResult(@PathVariable Long id, @RequestBody Result updatedResult) {
+        Result existingResult = resultService.findById(id);
+        updatedResult.setId(existingResult.getId());
+        Result savedResult = resultService.save(updatedResult);
+        return ResponseEntity.ok(savedResult);
+    }
+
+    // 🔹 Deletar resultado por ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
         resultService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

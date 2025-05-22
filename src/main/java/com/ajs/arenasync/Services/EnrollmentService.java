@@ -15,5 +15,7 @@ import com.ajs.arenasync.Repositories.TournamentRepository;
 
 @Service
 public class EnrollmentService {
+    
+}
 
 
