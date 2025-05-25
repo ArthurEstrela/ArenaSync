@@ -77,6 +77,8 @@ public class LocationPlatform implements Serializable{
         return matches;
     }
 
+    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -100,6 +102,10 @@ public class LocationPlatform implements Serializable{
         } else if (!id.equals(other.id))
             return false;
         return true;
+    }
+
+    public void setMatches(List<Match> matches) {
+        this.matches = matches;
     }
 
 }

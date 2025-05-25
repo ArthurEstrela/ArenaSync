@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.Entities.Prize;
-import com.ajs.arenasync.Entities.Tournament;
 import com.ajs.arenasync.Exceptions.BadRequestException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.ajs.arenasync.Repositories.PrizeRepository;

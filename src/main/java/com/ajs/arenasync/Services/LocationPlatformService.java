@@ -1,10 +1,13 @@
 package com.ajs.arenasync.Services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ajs.arenasync.DTO.LocationPlatformRequestDTO;
+import com.ajs.arenasync.DTO.LocationPlatformResponseDTO;
 import com.ajs.arenasync.Entities.LocationPlatform;
 import com.ajs.arenasync.Exceptions.BusinessException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
@@ -16,48 +19,64 @@ public class LocationPlatformService {
     @Autowired
     private LocationPlatformRepository locationPlatformRepository;
 
-    // Criar nova LocationPlatform com validação de nome único
-    public LocationPlatform create(LocationPlatform locationPlatform) {
-        // Validação simples por nome (se quiser implementar isso no repositório)
+    // Criar nova LocationPlatform com DTO
+    public LocationPlatformResponseDTO create(LocationPlatformRequestDTO dto) {
         if (locationPlatformRepository.findAll().stream()
-                .anyMatch(lp -> lp.getName().equalsIgnoreCase(locationPlatform.getName()))) {
+                .anyMatch(lp -> lp.getName().equalsIgnoreCase(dto.getName()))) {
             throw new BusinessException("Já existe um local/plataforma com esse nome.");
         }
 
-        return locationPlatformRepository.save(locationPlatform);
+        LocationPlatform lp = new LocationPlatform();
+        lp.setName(dto.getName());
+        lp.setType(dto.getType());
+
+        return toResponseDTO(locationPlatformRepository.save(lp));
     }
 
-    // Buscar por ID
-    public LocationPlatform findById(Long id) {
-        return locationPlatformRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Location/Platform", id));
+    // Buscar por ID e retornar como DTO
+    public LocationPlatformResponseDTO findById(Long id) {
+        LocationPlatform lp = locationPlatformRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
+        return toResponseDTO(lp);
     }
 
-    // Listar todos
-    public List<LocationPlatform> findAll() {
-        return locationPlatformRepository.findAll();
+    // Listar todos como DTOs
+    public List<LocationPlatformResponseDTO> findAll() {
+        return locationPlatformRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    // Atualizar local/plataforma
-    public LocationPlatform update(Long id, LocationPlatform updatedData) {
-        LocationPlatform existing = findById(id);
+    // Atualizar um registro com base no DTO
+    public LocationPlatformResponseDTO update(Long id, LocationPlatformRequestDTO dto) {
+        LocationPlatform existing = locationPlatformRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
 
-        // Verifica se está tentando alterar o nome para um que já existe em outro local
-        if (!existing.getName().equalsIgnoreCase(updatedData.getName()) &&
+        if (!existing.getName().equalsIgnoreCase(dto.getName()) &&
             locationPlatformRepository.findAll().stream()
-                .anyMatch(lp -> lp.getName().equalsIgnoreCase(updatedData.getName()))) {
+                .anyMatch(lp -> lp.getName().equalsIgnoreCase(dto.getName()))) {
             throw new BusinessException("Já existe um local/plataforma com esse nome.");
         }
 
-        existing.setName(updatedData.getName());
-        existing.setType(updatedData.getType());
+        existing.setName(dto.getName());
+        existing.setType(dto.getType());
 
-        return locationPlatformRepository.save(existing);
+        return toResponseDTO(locationPlatformRepository.save(existing));
     }
 
-    // Deletar por ID
+    // Deletar
     public void delete(Long id) {
-        LocationPlatform existing = findById(id);
+        LocationPlatform existing = locationPlatformRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
         locationPlatformRepository.delete(existing);
+    }
+
+    // Conversão para DTO
+    private LocationPlatformResponseDTO toResponseDTO(LocationPlatform entity) {
+        LocationPlatformResponseDTO dto = new LocationPlatformResponseDTO();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setType(entity.getType());
+        return dto;
     }
 }
