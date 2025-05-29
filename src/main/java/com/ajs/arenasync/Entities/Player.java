@@ -23,6 +23,8 @@ public class Player extends User implements Serializable {
     @JsonIgnore
     private Team team;
 
+    public Player(){};
+
     public Player(String position, Team team) {
         this.position = position;
         this.team = team;

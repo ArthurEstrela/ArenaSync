@@ -5,30 +5,19 @@ import jakarta.validation.constraints.NotBlank;
 
 public class OrganizerRequestDTO {
 
-    @NotBlank(message = "O nome é obrigatório.")
+    @NotBlank(message = "Nome é obrigatório.")
     private String name;
 
-    @NotBlank(message = "O e-mail é obrigatório.")
+    @NotBlank(message = "E-mail é obrigatório.")
     @Email(message = "E-mail inválido.")
-
-    
     private String email;
 
-    public String getName() {
-        return name;
-    }
+    @NotBlank(message = "Telefone é obrigatório.")
+    private String phoneNumber;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    private String organizationName;
+    private String bio;
+    private String socialLinks;
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    
+    // Getters e Setters
 }

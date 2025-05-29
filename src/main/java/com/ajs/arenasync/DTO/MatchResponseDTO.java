@@ -1,5 +1,7 @@
 package com.ajs.arenasync.DTO;
 
+import java.time.LocalDateTime;
+
 public class MatchResponseDTO {
 
     private Long id;
@@ -7,7 +9,9 @@ public class MatchResponseDTO {
     private String teamBName;
     private String tournamentName;
     private String locationPlatformName;
-    private String scheduledDateTime;
+    private LocalDateTime scheduledDateTime;
+    private Integer scoreTeamA;
+    private Integer scoreTeamB;
     
     public Long getId() {
         return id;
@@ -39,11 +43,23 @@ public class MatchResponseDTO {
     public void setLocationPlatformName(String locationPlatformName) {
         this.locationPlatformName = locationPlatformName;
     }
-    public String getScheduledDateTime() {
+    public LocalDateTime getScheduledDateTime() {
         return scheduledDateTime;
     }
-    public void setScheduledDateTime(String scheduledDateTime) {
+    public void setScheduledDateTime(LocalDateTime scheduledDateTime) {
         this.scheduledDateTime = scheduledDateTime;
+    }
+    public Integer getScoreTeamA() {
+        return scoreTeamA;
+    }
+    public void setScoreTeamA(Integer scoreTeamA) {
+        this.scoreTeamA = scoreTeamA;
+    }
+    public Integer getScoreTeamB() {
+        return scoreTeamB;
+    }
+    public void setScoreTeamB(Integer scoreTeamB) {
+        this.scoreTeamB = scoreTeamB;
     }
 
     
