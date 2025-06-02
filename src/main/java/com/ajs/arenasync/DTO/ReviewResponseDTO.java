@@ -6,8 +6,8 @@ public class ReviewResponseDTO {
     private Integer rating;
     private String comment;
     private String userName;
+    private String matchInfo;
     private String tournamentName;
-
     
     public Long getId() {
         return id;
@@ -32,6 +32,12 @@ public class ReviewResponseDTO {
     }
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+    public String getMatchInfo() {
+        return matchInfo;
+    }
+    public void setMatchInfo(String matchInfo) {
+        this.matchInfo = matchInfo;
     }
     public String getTournamentName() {
         return tournamentName;

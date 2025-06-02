@@ -13,5 +13,8 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
     Result findByMatchId(Long matchId);
 
     boolean existsByMatch(Match match);
+
+    boolean existsByMatchId(Long matchId);
+
 }
 

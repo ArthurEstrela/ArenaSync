@@ -1,14 +1,21 @@
 package com.ajs.arenasync.Services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ajs.arenasync.DTO.ReviewRequestDTO;
+import com.ajs.arenasync.DTO.ReviewResponseDTO;
+import com.ajs.arenasync.Entities.Match;
 import com.ajs.arenasync.Entities.Review;
+import com.ajs.arenasync.Entities.User;
 import com.ajs.arenasync.Exceptions.BadRequestException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
+import com.ajs.arenasync.Repositories.MatchRepository;
 import com.ajs.arenasync.Repositories.ReviewRepository;
+import com.ajs.arenasync.Repositories.UserRepository;
 
 @Service
 public class ReviewService {
@@ -16,14 +23,31 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
-    public Review save(Review review) {
-        validateReview(review);
-        return reviewRepository.save(review);
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private MatchRepository matchRepository;
+
+    public ReviewResponseDTO save(ReviewRequestDTO dto) {
+        validateReview(dto);
+
+        Review review = toEntity(dto);
+        Review saved = reviewRepository.save(review);
+
+        return toResponseDTO(saved);
     }
 
-    public Review findById(Long id) {
-        return reviewRepository.findById(id)
+    public ReviewResponseDTO findById(Long id) {
+        Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Avaliação", id));
+        return toResponseDTO(review);
+    }
+
+    public List<ReviewResponseDTO> findAll() {
+        return reviewRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     public void deleteById(Long id) {
@@ -33,25 +57,43 @@ public class ReviewService {
         reviewRepository.deleteById(id);
     }
 
-    public List<Review> findAll() {
-        return reviewRepository.findAll();
+    private void validateReview(ReviewRequestDTO dto) {
+        if (dto.getMatchId() == null) {
+            throw new BadRequestException("É necessário informar o ID da partida para avaliar.");
+        }
+
+        if (reviewRepository.existsByUserIdAndMatchId(dto.getUserId(), dto.getMatchId())) {
+            throw new BadRequestException("Você já avaliou esta partida.");
+        }
+
+        if (dto.getRating() == null || dto.getRating() < 1 || dto.getRating() > 5) {
+            throw new BadRequestException("A nota da avaliação deve estar entre 1 e 5.");
+        }
     }
 
-    private void validateReview(Review review) {
-        if (review.getRating() == null) {
-            throw new BadRequestException("A nota da avaliação é obrigatória.");
-        }
+    private Review toEntity(ReviewRequestDTO dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new BadRequestException("Usuário não encontrado."));
 
-        if (review.getRating() < 1 || review.getRating() > 5) {
-            throw new BadRequestException("A nota deve estar entre 1 e 5.");
-        }
+        Match match = matchRepository.findById(dto.getMatchId())
+                .orElseThrow(() -> new BadRequestException("Partida não encontrada."));
 
-        if (review.getUser() == null) {
-            throw new BadRequestException("O usuário da avaliação deve ser informado.");
-        }
+        Review review = new Review();
+        review.setRating(dto.getRating());
+        review.setComment(dto.getComment());
+        review.setUser(user);
+        review.setMatch(match);
 
-        if (review.getTournament() == null) {
-            throw new BadRequestException("O torneio da avaliação deve ser informado.");
-        }
+        return review;
+    }
+
+    private ReviewResponseDTO toResponseDTO(Review review) {
+        ReviewResponseDTO dto = new ReviewResponseDTO();
+        dto.setId(review.getId());
+        dto.setRating(review.getRating());
+        dto.setComment(review.getComment());
+        dto.setUserName(review.getUser().getName());
+        dto.setMatchInfo("Partida ID: " + review.getMatch().getId());
+        return dto;
     }
 }

@@ -23,6 +23,8 @@ public class Organizer extends User implements Serializable {
     @OneToMany(mappedBy = "organizer")
     private List<Tournament> tournaments;
 
+    public Organizer(){}
+
 
     public Organizer(Long id, @NotBlank(message = "O nome é obrigatório") String name,
             @NotBlank(message = "A idade é obrigatório") Integer age,

@@ -2,12 +2,7 @@ package com.ajs.arenasync.Entities;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Review implements Serializable {
@@ -16,27 +11,30 @@ public class Review implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private Integer rating;
+
     private String comment;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
     @ManyToOne
-    @JoinColumn(name = "tournament_id")
+    @JoinColumn(name = "match_id")
+    private Match match;
 
-    private Tournament tournament;
+    public Review() {}
 
-    public Review() {
-    }
-
-    public Review(Long id, Integer rating, String comment, User user, Tournament tournament) {
+    public Review(Long id, Integer rating, String comment, User user, Match match) {
         this.id = id;
         this.rating = rating;
         this.comment = comment;
         this.user = user;
-        this.tournament = tournament;
+        this.match = match;
     }
+
+    // Getters e Setters
 
     public Long getId() {
         return id;
@@ -70,37 +68,24 @@ public class Review implements Serializable {
         this.user = user;
     }
 
-    public Tournament getTournament() {
-        return tournament;
+    public Match getMatch() {
+        return match;
     }
 
-    public void setTournament(Tournament tournament) {
-        this.tournament = tournament;
+    public void setMatch(Match match) {
+        this.match = match;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+        return (id == null) ? 0 : id.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
         Review other = (Review) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+        return id != null && id.equals(other.getId());
     }
-
 }
