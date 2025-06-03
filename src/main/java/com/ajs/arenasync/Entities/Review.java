@@ -24,7 +24,12 @@ public class Review implements Serializable {
     @JoinColumn(name = "match_id")
     private Match match;
 
-    public Review() {}
+    @ManyToOne
+    @JoinColumn(name = "tournament_id") // ou o nome correto da coluna FK
+    private Tournament tournament;
+
+    public Review() {
+    }
 
     public Review(Long id, Integer rating, String comment, User user, Match match) {
         this.id = id;
@@ -83,8 +88,10 @@ public class Review implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
         Review other = (Review) obj;
         return id != null && id.equals(other.getId());
     }
