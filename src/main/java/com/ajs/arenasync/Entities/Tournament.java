@@ -1,6 +1,7 @@
 package com.ajs.arenasync.Entities;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,8 +34,8 @@ public class Tournament implements Serializable {
     @NotBlank(message = "A modalidade é obrigatório") // Não pode ser nulo ou vazio
     private String modality;
     private String rules;
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     private TournamentStatus status;
@@ -54,9 +55,12 @@ public class Tournament implements Serializable {
     public Tournament() {
     }
 
-    public Tournament(Long id, String name, TournamentType type, String modality, String rules, Date startDate,
-            Date endDate, List<Enrollment> enrollments, List<Match> matches, List<Prize> prizes, List<Review> reviews,
-            User organizer) {
+
+    public Tournament(Long id, @NotBlank(message = "O nome é obrigatório") String name,
+            @NotBlank(message = "O tipo é obrigatório") TournamentType type,
+            @NotBlank(message = "A modalidade é obrigatório") String modality, String rules, LocalDate startDate,
+            LocalDate endDate, TournamentStatus status, List<Enrollment> enrollments, List<Match> matches,
+            List<Prize> prizes, List<Review> reviews, User organizer) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -64,12 +68,15 @@ public class Tournament implements Serializable {
         this.rules = rules;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.status = status;
         this.enrollments = enrollments;
         this.matches = matches;
         this.prizes = prizes;
         this.reviews = reviews;
         this.organizer = organizer;
     }
+
+
 
     public Long getId() {
         return id;
@@ -119,19 +126,19 @@ public class Tournament implements Serializable {
         this.status = status;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

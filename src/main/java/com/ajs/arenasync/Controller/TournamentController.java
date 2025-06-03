@@ -3,69 +3,75 @@ package com.ajs.arenasync.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ajs.arenasync.Entities.Tournament;
+import com.ajs.arenasync.DTO.TournamentRequestDTO;
+import com.ajs.arenasync.DTO.TournamentResponseDTO;
 import com.ajs.arenasync.Services.TournamentService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/tournaments")
+@RequestMapping("/api/tournaments")
 public class TournamentController {
 
     @Autowired
     private TournamentService tournamentService;
 
-    // Criar torneio - passando organizerId por parâmetro
-    @PostMapping
-    public ResponseEntity<Tournament> createTournament(
-            @RequestParam Long organizerId,
-            @RequestBody Tournament tournament) {
-        Tournament created = tournamentService.createTournament(organizerId, tournament);
+    // CREATE
+    @PostMapping("/organizer/{organizerId}")
+    public ResponseEntity<TournamentResponseDTO> createTournament(
+            @PathVariable Long organizerId,
+            @Valid @RequestBody TournamentRequestDTO dto) {
+        
+        TournamentResponseDTO created = tournamentService.createTournament(organizerId, dto);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    // Buscar torneio por ID
+    // READ - find by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Tournament> getById(@PathVariable Long id) {
-        Tournament tournament = tournamentService.findById(id);
+    public ResponseEntity<TournamentResponseDTO> getTournamentById(@PathVariable Long id) {
+        TournamentResponseDTO tournament = tournamentService.findById(id);
         return ResponseEntity.ok(tournament);
     }
 
-    // Listar todos os torneios
+    // READ - list all
     @GetMapping
-    public ResponseEntity<List<Tournament>> getAll() {
-        List<Tournament> tournaments = tournamentService.getAllTournaments();
+    public ResponseEntity<List<TournamentResponseDTO>> getAllTournaments() {
+        List<TournamentResponseDTO> tournaments = tournamentService.getAllTournaments();
         return ResponseEntity.ok(tournaments);
     }
 
-    // Atualizar torneio
+    // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<Tournament> updateTournament(
+    public ResponseEntity<TournamentResponseDTO> updateTournament(
             @PathVariable Long id,
-            @RequestBody Tournament updatedData) {
-        Tournament updated = tournamentService.updateTournament(id, updatedData);
+            @Valid @RequestBody TournamentRequestDTO dto) {
+        
+        TournamentResponseDTO updated = tournamentService.updateTournament(id, dto);
         return ResponseEntity.ok(updated);
     }
 
-    // Deletar torneio
+    // DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTournament(@PathVariable Long id) {
         tournamentService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Iniciar torneio
-    @PutMapping("/{id}/start")
-    public ResponseEntity<Tournament> startTournament(@PathVariable Long id) {
-        Tournament started = tournamentService.startTournament(id);
+    // START
+    @PostMapping("/{id}/start")
+    public ResponseEntity<TournamentResponseDTO> startTournament(@PathVariable Long id) {
+        TournamentResponseDTO started = tournamentService.startTournament(id);
         return ResponseEntity.ok(started);
     }
 
-    // Finalizar torneio
-    @PutMapping("/{id}/finish")
-    public ResponseEntity<Tournament> finishTournament(@PathVariable Long id) {
-        Tournament finished = tournamentService.finishTournament(id);
+    // FINISH
+    @PostMapping("/{id}/finish")
+    public ResponseEntity<TournamentResponseDTO> finishTournament(@PathVariable Long id) {
+        TournamentResponseDTO finished = tournamentService.finishTournament(id);
         return ResponseEntity.ok(finished);
     }
 }

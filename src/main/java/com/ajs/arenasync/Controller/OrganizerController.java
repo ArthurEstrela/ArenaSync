@@ -3,50 +3,52 @@ package com.ajs.arenasync.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ajs.arenasync.Entities.Organizer;
+import com.ajs.arenasync.DTO.OrganizerRequestDTO;
+import com.ajs.arenasync.DTO.OrganizerResponseDTO;
 import com.ajs.arenasync.Services.OrganizerService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/organizers")
+@RequestMapping("/api/organizers")
 public class OrganizerController {
 
     @Autowired
     private OrganizerService organizerService;
 
-    // Criar organizador
-    @PostMapping
-    public ResponseEntity<Organizer> create(@RequestBody Organizer organizer) {
-        Organizer created = organizerService.createOrganizer(organizer);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
-    }
-
-    // Buscar organizador por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Organizer> getById(@PathVariable Long id) {
-        Organizer organizer = organizerService.getOrganizerById(id);
+    public ResponseEntity<OrganizerResponseDTO> getOrganizerById(@PathVariable Long id) {
+        OrganizerResponseDTO organizer = organizerService.getOrganizerById(id);
         return ResponseEntity.ok(organizer);
     }
 
-    // Listar todos os organizadores
     @GetMapping
-    public ResponseEntity<List<Organizer>> getAll() {
-        List<Organizer> organizers = organizerService.getAllOrganizers();
+    public ResponseEntity<List<OrganizerResponseDTO>> getAllOrganizers() {
+        List<OrganizerResponseDTO> organizers = organizerService.getAllOrganizers();
         return ResponseEntity.ok(organizers);
     }
 
-    // Atualizar organizador
+    @PostMapping
+    public ResponseEntity<OrganizerResponseDTO> createOrganizer(
+            @Valid @RequestBody OrganizerRequestDTO dto) {
+        OrganizerResponseDTO created = organizerService.createOrganizer(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Organizer> update(@PathVariable Long id, @RequestBody Organizer updatedOrganizer) {
-        Organizer updated = organizerService.updateOrganizer(id, updatedOrganizer);
+    public ResponseEntity<OrganizerResponseDTO> updateOrganizer(
+            @PathVariable Long id,
+            @Valid @RequestBody OrganizerRequestDTO dto) {
+        OrganizerResponseDTO updated = organizerService.updateOrganizer(id, dto);
         return ResponseEntity.ok(updated);
     }
 
-    // Deletar organizador
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteOrganizer(@PathVariable Long id) {
         organizerService.deleteOrganizer(id);
         return ResponseEntity.noContent().build();
     }

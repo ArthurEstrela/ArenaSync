@@ -15,6 +15,9 @@ public class UserRequestDTO {
     @NotBlank(message = "A senha é obrigatória.")
     private String password;
 
+    @NotBlank(message = "A idade é obrigatória.")
+    private Integer age;
+
     public String getName() {
         return name;
     }
@@ -39,5 +42,14 @@ public class UserRequestDTO {
         this.password = password;
     }
 
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
     
+
 }

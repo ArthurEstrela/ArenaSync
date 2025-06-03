@@ -2,12 +2,7 @@ package com.ajs.arenasync.Entities;
 
 import java.io.Serializable;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Result implements Serializable {
@@ -16,19 +11,21 @@ public class Result implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String details;
+
+    private Integer scoreTeamA;
+    private Integer scoreTeamB;
 
     @OneToOne
-    @JoinColumn(name = "match_id")
-
+    @JoinColumn(name = "match_id", unique = true)
     private Match match;
 
     public Result() {
     }
 
-    public Result(Long id, String details, Match match) {
+    public Result(Long id, Integer scoreTeamA, Integer scoreTeamB, Match match) {
         this.id = id;
-        this.details = details;
+        this.scoreTeamA = scoreTeamA;
+        this.scoreTeamB = scoreTeamB;
         this.match = match;
     }
 
@@ -40,12 +37,20 @@ public class Result implements Serializable {
         this.id = id;
     }
 
-    public String getDetails() {
-        return details;
+    public Integer getScoreTeamA() {
+        return scoreTeamA;
     }
 
-    public void setDetails(String details) {
-        this.details = details;
+    public void setScoreTeamA(Integer scoreTeamA) {
+        this.scoreTeamA = scoreTeamA;
+    }
+
+    public Integer getScoreTeamB() {
+        return scoreTeamB;
+    }
+
+    public void setScoreTeamB(Integer scoreTeamB) {
+        this.scoreTeamB = scoreTeamB;
     }
 
     public Match getMatch() {
@@ -58,27 +63,14 @@ public class Result implements Serializable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+        return (id != null) ? id.hashCode() : 0;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        if (this == obj) return true;
+        if (!(obj instanceof Result)) return false;
         Result other = (Result) obj;
-        if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+        return id != null && id.equals(other.getId());
     }
-
 }

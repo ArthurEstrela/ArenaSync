@@ -3,47 +3,52 @@ package com.ajs.arenasync.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ajs.arenasync.Entities.LocationPlatform;
+import com.ajs.arenasync.DTO.LocationPlatformRequestDTO;
+import com.ajs.arenasync.DTO.LocationPlatformResponseDTO;
 import com.ajs.arenasync.Services.LocationPlatformService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/locations")
+@RequestMapping("/api/location-platforms")
 public class LocationPlatformController {
 
     @Autowired
     private LocationPlatformService locationPlatformService;
 
-    // Criar local ou plataforma
+    // Criar nova LocationPlatform
     @PostMapping
-    public ResponseEntity<LocationPlatform> create(@RequestBody LocationPlatform locationPlatform) {
-        LocationPlatform created = locationPlatformService.create(locationPlatform);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    public ResponseEntity<LocationPlatformResponseDTO> create(@RequestBody @Valid LocationPlatformRequestDTO dto) {
+        LocationPlatformResponseDTO created = locationPlatformService.create(dto);
+        return ResponseEntity.ok(created);
     }
 
     // Buscar por ID
     @GetMapping("/{id}")
-    public ResponseEntity<LocationPlatform> getById(@PathVariable Long id) {
-        LocationPlatform location = locationPlatformService.findById(id);
-        return ResponseEntity.ok(location);
+    public ResponseEntity<LocationPlatformResponseDTO> findById(@PathVariable Long id) {
+        LocationPlatformResponseDTO response = locationPlatformService.findById(id);
+        return ResponseEntity.ok(response);
     }
 
     // Listar todos
     @GetMapping
-    public ResponseEntity<List<LocationPlatform>> getAll() {
-        return ResponseEntity.ok(locationPlatformService.findAll());
+    public ResponseEntity<List<LocationPlatformResponseDTO>> findAll() {
+        List<LocationPlatformResponseDTO> list = locationPlatformService.findAll();
+        return ResponseEntity.ok(list);
     }
 
-    // Atualizar
+    // Atualizar por ID
     @PutMapping("/{id}")
-    public ResponseEntity<LocationPlatform> update(@PathVariable Long id, @RequestBody LocationPlatform updatedData) {
-        LocationPlatform updated = locationPlatformService.update(id, updatedData);
+    public ResponseEntity<LocationPlatformResponseDTO> update(@PathVariable Long id,
+            @RequestBody @Valid LocationPlatformRequestDTO dto) {
+        LocationPlatformResponseDTO updated = locationPlatformService.update(id, dto);
         return ResponseEntity.ok(updated);
     }
 
-    // Deletar
+    // Deletar por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         locationPlatformService.delete(id);

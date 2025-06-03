@@ -2,9 +2,14 @@ package com.ajs.arenasync.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.ajs.arenasync.DTO.StatisticRequestDTO;
+import com.ajs.arenasync.DTO.StatisticResponseDTO;
+import com.ajs.arenasync.Entities.Player;
 import com.ajs.arenasync.Entities.Statistic;
-import com.ajs.arenasync.Exceptions.BusinessException;
+import com.ajs.arenasync.Exceptions.BadRequestException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
+import com.ajs.arenasync.Repositories.PlayerRepository;
 import com.ajs.arenasync.Repositories.StatisticRepository;
 
 @Service
@@ -13,37 +18,73 @@ public class StatisticService {
     @Autowired
     private StatisticRepository statisticRepository;
 
-    // Salvar com validações
-    public Statistic save(Statistic statistic) {
-        if (statistic.getPlayer() == null) {
-            throw new BusinessException("Usuário da estatística é obrigatório.");
-        }
-        // Regras adicionais podem ser aplicadas aqui conforme sua lógica
-        return statisticRepository.save(statistic);
+    @Autowired
+    private PlayerRepository playerRepository;
+
+    public StatisticResponseDTO save(StatisticRequestDTO dto) {
+        validateStatistic(dto);
+
+        Player player = playerRepository.findById(dto.getPlayerId())
+                .orElseThrow(() -> new BadRequestException("Jogador não encontrado."));
+
+        Statistic statistic = new Statistic();
+        statistic.setGamesPlayed(dto.getGamesPlayed());
+        statistic.setWins(dto.getWins());
+        statistic.setScore(dto.getScore());
+        statistic.setPlayer(player);
+
+        return toResponseDTO(statisticRepository.save(statistic));
     }
 
-    // Buscar por ID com tratamento de erro
-    public Statistic findById(Long id) {
-        return statisticRepository.findById(id)
+    public StatisticResponseDTO findById(Long id) {
+        Statistic statistic = statisticRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Estatística", id));
+        return toResponseDTO(statistic);
     }
 
-    // Atualizar com validação
-    public Statistic update(Long id, Statistic statistic) {
-        Statistic existing = findById(id); // dispara exceção se não achar
+    public StatisticResponseDTO update(Long id, StatisticRequestDTO dto) {
+        Statistic existing = statisticRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Estatística", id));
 
-        // Atualizar os campos necessários
-        existing.setGamesPlayed(statistic.getGamesPlayed());
-        existing.setWins(statistic.getWins());
-        existing.setScore(statistic.getScore());
-        existing.setPlayer(statistic.getPlayer()); // ou evite atualizar user, dependendo da regra
+        existing.setGamesPlayed(dto.getGamesPlayed());
+        existing.setWins(dto.getWins());
+        existing.setScore(dto.getScore());
 
-        return statisticRepository.save(existing);
+        // Regras: se não quiser permitir trocar o player, remova essa parte
+        Player player = playerRepository.findById(dto.getPlayerId())
+                .orElseThrow(() -> new BadRequestException("Jogador não encontrado."));
+        existing.setPlayer(player);
+
+        return toResponseDTO(statisticRepository.save(existing));
     }
 
-    // Deletar com verificação
     public void deleteById(Long id) {
-        Statistic existing = findById(id);
-        statisticRepository.deleteById(existing.getId());
+        Statistic existing = statisticRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Estatística", id));
+        statisticRepository.delete(existing);
+    }
+
+    private void validateStatistic(StatisticRequestDTO dto) {
+        if (dto.getPlayerId() == null) {
+            throw new BadRequestException("O ID do jogador é obrigatório.");
+        }
+
+        if (dto.getGamesPlayed() < 0 || dto.getWins() < 0 || dto.getScore() < 0) {
+            throw new BadRequestException("Valores não podem ser negativos.");
+        }
+
+        if (dto.getWins() > dto.getGamesPlayed()) {
+            throw new BadRequestException("Vitórias não podem exceder o número de partidas jogadas.");
+        }
+    }
+
+    private StatisticResponseDTO toResponseDTO(Statistic statistic) {
+        StatisticResponseDTO dto = new StatisticResponseDTO();
+        dto.setId(statistic.getId());
+        dto.setGamesPlayed(statistic.getGamesPlayed());
+        dto.setWins(statistic.getWins());
+        dto.setScore(statistic.getScore());
+        dto.setPlayerName(statistic.getPlayer().getName());
+        return dto;
     }
 }

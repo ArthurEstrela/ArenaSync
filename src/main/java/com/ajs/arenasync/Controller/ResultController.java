@@ -3,11 +3,15 @@ package com.ajs.arenasync.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ajs.arenasync.Entities.Result;
+import com.ajs.arenasync.DTO.ResultRequestDTO;
+import com.ajs.arenasync.DTO.ResultResponseDTO;
 import com.ajs.arenasync.Services.ResultService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/results")
@@ -16,37 +20,24 @@ public class ResultController {
     @Autowired
     private ResultService resultService;
 
-    // 🔹 Criar um novo resultado
     @PostMapping
-    public ResponseEntity<Result> createResult(@RequestBody Result result) {
-        Result savedResult = resultService.save(result);
-        return ResponseEntity.ok(savedResult);
+    public ResponseEntity<ResultResponseDTO> createResult(@Valid @RequestBody ResultRequestDTO dto) {
+        ResultResponseDTO created = resultService.save(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    // 🔹 Buscar resultado por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Result> getResultById(@PathVariable Long id) {
-        Result result = resultService.findById(id);
+    public ResponseEntity<ResultResponseDTO> getResultById(@PathVariable Long id) {
+        ResultResponseDTO result = resultService.findById(id);
         return ResponseEntity.ok(result);
     }
 
-    // 🔹 Listar todos os resultados
     @GetMapping
-    public ResponseEntity<List<Result>> getAllResults() {
-        List<Result> results = resultService.findAll();
+    public ResponseEntity<List<ResultResponseDTO>> getAllResults() {
+        List<ResultResponseDTO> results = resultService.findAll();
         return ResponseEntity.ok(results);
     }
 
-    // 🔹 Atualizar um resultado
-    @PutMapping("/{id}")
-    public ResponseEntity<Result> updateResult(@PathVariable Long id, @RequestBody Result updatedResult) {
-        Result existingResult = resultService.findById(id);
-        updatedResult.setId(existingResult.getId());
-        Result savedResult = resultService.save(updatedResult);
-        return ResponseEntity.ok(savedResult);
-    }
-
-    // 🔹 Deletar resultado por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteResult(@PathVariable Long id) {
         resultService.deleteById(id);
