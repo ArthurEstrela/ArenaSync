@@ -2,7 +2,13 @@ package com.ajs.arenasync.DTO;
 
 import java.time.LocalDateTime;
 
-public class MatchResponseDTO {
+import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class MatchResponseDTO extends RepresentationModel<MatchResponseDTO>{
 
     private Long id;
     private String teamAName;

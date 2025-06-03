@@ -1,8 +1,13 @@
 package com.ajs.arenasync.DTO;
 
-import com.ajs.arenasync.Entities.Enums.TournamentType;
+import org.springframework.hateoas.RepresentationModel;
 
-public class LocationPlatformResponseDTO {
+import com.ajs.arenasync.Entities.Enums.TournamentType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class LocationPlatformResponseDTO extends RepresentationModel<LocationPlatformResponseDTO>{
 
     private Long id;
     private String name;

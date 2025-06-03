@@ -1,6 +1,12 @@
 package com.ajs.arenasync.DTO;
 
-public class ReviewResponseDTO {
+import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class ReviewResponseDTO extends RepresentationModel<ReviewResponseDTO> {
 
     private Long id;
     private Integer rating;

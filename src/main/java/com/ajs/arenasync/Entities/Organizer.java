@@ -13,18 +13,16 @@ import jakarta.validation.constraints.Size;
 public class Organizer extends User implements Serializable {
     private static final long serialVersionUID = 1L;
 
-
     private String organizationName;
     private String phoneNumber;
     private String bio;
     private String socialLinks;
-    
 
     @OneToMany(mappedBy = "organizer")
     private List<Tournament> tournaments;
 
-    public Organizer(){}
-
+    public Organizer() {
+    }
 
     public Organizer(Long id, @NotBlank(message = "O nome é obrigatório") String name,
             @NotBlank(message = "A idade é obrigatório") Integer age,
@@ -40,7 +38,6 @@ public class Organizer extends User implements Serializable {
         tournaments = tournaments2;
     }
 
-
     public Organizer(String organizationName, String phoneNumber, String bio, String socialLinks,
             List<Tournament> tournaments) {
         this.organizationName = organizationName;
@@ -50,51 +47,45 @@ public class Organizer extends User implements Serializable {
         this.tournaments = tournaments;
     }
 
-
     public String getOrganizationName() {
         return organizationName;
     }
-
 
     public void setOrganizationName(String organizationName) {
         this.organizationName = organizationName;
     }
 
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 
-
     public String getBio() {
         return bio;
     }
-
 
     public void setBio(String bio) {
         this.bio = bio;
     }
 
-
     public String getSocialLinks() {
         return socialLinks;
     }
-
 
     public void setSocialLinks(String socialLinks) {
         this.socialLinks = socialLinks;
     }
 
-
     public List<Tournament> getTournaments() {
         return tournaments;
     }
 
+    public void setTournaments(List<Tournament> tournaments) {
+        this.tournaments = tournaments;
+    }
 
     @Override
     public int hashCode() {
@@ -104,7 +95,6 @@ public class Organizer extends User implements Serializable {
         result = prime * result + ((tournaments == null) ? 0 : tournaments.hashCode());
         return result;
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -128,7 +118,4 @@ public class Organizer extends User implements Serializable {
         return true;
     }
 
-    
-
-    
 }

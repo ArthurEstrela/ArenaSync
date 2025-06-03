@@ -1,12 +1,16 @@
 package com.ajs.arenasync.DTO;
 
 import java.time.LocalDate;
-import java.util.Date;
+
+import org.springframework.hateoas.RepresentationModel;
 
 import com.ajs.arenasync.Entities.Enums.TournamentStatus;
 import com.ajs.arenasync.Entities.Enums.TournamentType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-public class TournamentResponseDTO {
+@JsonInclude(Include.NON_NULL)
+public class TournamentResponseDTO extends RepresentationModel<TournamentResponseDTO>{
     private Long id;
     private String name;
     private String modality;

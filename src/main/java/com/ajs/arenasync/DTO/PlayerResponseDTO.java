@@ -1,6 +1,12 @@
 package com.ajs.arenasync.DTO;
 
-public class PlayerResponseDTO {
+import org.springframework.hateoas.RepresentationModel;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_NULL)
+public class PlayerResponseDTO extends RepresentationModel<PlayerResponseDTO>{
 
     private Long id;
     private String name;

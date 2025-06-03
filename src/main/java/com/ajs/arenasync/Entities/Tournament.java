@@ -3,7 +3,6 @@ package com.ajs.arenasync.Entities;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import com.ajs.arenasync.Entities.Enums.TournamentStatus;
