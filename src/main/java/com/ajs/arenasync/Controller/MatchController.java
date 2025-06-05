@@ -3,8 +3,10 @@ package com.ajs.arenasync.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
+import org.springframework.hateoas.CollectionModel; // Importe para coleções HATEOAS
+import org.springframework.hateoas.Link; // Importe para Links HATEOAS
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*; // Import estático para linkTo e methodOn
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,18 +15,20 @@ import com.ajs.arenasync.DTO.MatchResponseDTO;
 import com.ajs.arenasync.Services.MatchService;
 
 import jakarta.validation.Valid;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+import io.swagger.v3.oas.annotations.Operation; // Importe esta anotação
+import io.swagger.v3.oas.annotations.tags.Tag; // Importe esta anotação
+import io.swagger.v3.oas.annotations.Parameter; // Importe esta anotação para documentar PathVariable
 
 @RestController
 @RequestMapping("/api/matches")
+@Tag(name = "Match Management", description = "Operações para gerenciar partidas de torneios") // Anotação na classe
 public class MatchController {
 
     @Autowired
     private MatchService matchService;
 
     @PostMapping
+    @Operation(summary = "Criar nova partida", description = "Cria uma nova partida com base nas equipes, torneio, local/plataforma e data/hora agendada")
     public ResponseEntity<MatchResponseDTO> create(@RequestBody @Valid MatchRequestDTO dto) {
         MatchResponseDTO created = matchService.saveFromDTO(dto);
         created.add(linkTo(methodOn(MatchController.class).findById(created.getId())).withSelfRel());
@@ -44,19 +48,17 @@ public class MatchController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MatchResponseDTO> findById(@PathVariable Long id) {
+    @Operation(summary = "Obter partida por ID", description = "Retorna uma partida específica com base no seu ID")
+    public ResponseEntity<MatchResponseDTO> findById(
+            @Parameter(description = "ID da partida a ser buscada", required = true) @PathVariable Long id) {
         MatchResponseDTO response = matchService.findById(id);
         response.add(linkTo(methodOn(MatchController.class).findById(id)).withSelfRel());
         response.add(linkTo(methodOn(MatchController.class).findAll()).withRel("all-matches"));
         response.add(linkTo(methodOn(MatchController.class).deleteById(id)).withRel("delete"));
         
         // Links para recursos relacionados (Teams, Tournament, LocationPlatform)
-        // Supondo que MatchResponseDTO tenha os IDs para gerar esses links
-        // Se MatchResponseDTO não expõe os IDs diretamente, seria necessário ajustar o DTO ou o serviço
+        // Se MatchResponseDTO não expõe os IDs diretamente, é necessário ajustar o DTO ou o serviço
         // para obter esses IDs para a criação dos links HATEOAS.
-        // Por exemplo, se você tem match.getTeamA().getId() no serviço, o responseDTO precisaria do teamAId.
-        // Como o DTO de resposta atual não possui os IDs diretos das entidades relacionadas, não é possível criar esses links aqui apenas com o DTO de resposta.
-        // Para fins de demonstração, vou comentar a parte que exige os IDs no DTO de resposta.
         /*
         if (response.getTeamAId() != null) { // Exemplo: se TeamAId estivesse no DTO de resposta
             try {
@@ -69,7 +71,9 @@ public class MatchController {
     }
 
     @GetMapping
+    @Operation(summary = "Listar todas as partidas", description = "Retorna uma lista de todas as partidas agendadas ou concluídas")
     public ResponseEntity<CollectionModel<MatchResponseDTO>> findAll() {
+        // Assume que MatchService.findAll() existe e retorna List<MatchResponseDTO>
         List<MatchResponseDTO> list = matchService.findAll();
         for (MatchResponseDTO match : list) {
             match.add(linkTo(methodOn(MatchController.class).findById(match.getId())).withSelfRel());
@@ -81,7 +85,9 @@ public class MatchController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    @Operation(summary = "Deletar partida", description = "Deleta uma partida do sistema pelo seu ID")
+    public ResponseEntity<Void> deleteById(
+            @Parameter(description = "ID da partida a ser deletada", required = true) @PathVariable Long id) {
         matchService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

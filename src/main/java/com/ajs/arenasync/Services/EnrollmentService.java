@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.EnrollmentRequestDTO;
@@ -18,6 +19,7 @@ import com.ajs.arenasync.Repositories.TeamRepository;
 import com.ajs.arenasync.Repositories.TournamentRepository;
 
 @Service
+@CacheConfig(cacheNames = "enrollments")
 public class EnrollmentService {
 
     @Autowired
@@ -29,6 +31,7 @@ public class EnrollmentService {
     @Autowired
     private TournamentRepository tournamentRepository;
 
+    @CacheEvict(allEntries = true)
     public EnrollmentResponseDTO saveFromDTO(EnrollmentRequestDTO dto) {
         Enrollment enrollment = toEntity(dto);
         validateEnrollment(enrollment);
@@ -36,18 +39,24 @@ public class EnrollmentService {
         return toResponseDTO(saved);
     }
 
+    @Cacheable(key = "#id")
     public EnrollmentResponseDTO findById(Long id) {
         Enrollment enrollment = enrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Inscrição", id));
         return toResponseDTO(enrollment);
     }
 
+    @Cacheable
     public List<EnrollmentResponseDTO> findAll() {
         return enrollmentRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         if (!enrollmentRepository.existsById(id)) {
             throw new ResourceNotFoundException("Inscrição", id);
@@ -55,7 +64,6 @@ public class EnrollmentService {
         enrollmentRepository.deleteById(id);
     }
 
-    // Conversão de DTO para Entidade
     private Enrollment toEntity(EnrollmentRequestDTO dto) {
         Team team = teamRepository.findById(dto.getTeamId())
                 .orElseThrow(() -> new BadRequestException("Time informado não encontrado."));
@@ -70,7 +78,6 @@ public class EnrollmentService {
         return enrollment;
     }
 
-    // Conversão de Entidade para DTO
     public EnrollmentResponseDTO toResponseDTO(Enrollment enrollment) {
         EnrollmentResponseDTO dto = new EnrollmentResponseDTO();
         dto.setId(enrollment.getId());
@@ -96,7 +103,6 @@ public class EnrollmentService {
             throw new BadRequestException("O status da inscrição é obrigatório.");
         }
 
-        // Evitar duplicidade
         if (enrollmentRepository.existsByTeamAndTournament(team, tournament)
                 && (enrollment.getId() == null)) {
             throw new BadRequestException("Esse time já está inscrito neste torneio.");

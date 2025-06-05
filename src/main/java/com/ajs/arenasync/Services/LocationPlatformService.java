@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.LocationPlatformRequestDTO;
@@ -14,12 +15,13 @@ import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.ajs.arenasync.Repositories.LocationPlatformRepository;
 
 @Service
+@CacheConfig(cacheNames = "locationPlatforms")
 public class LocationPlatformService {
 
     @Autowired
     private LocationPlatformRepository locationPlatformRepository;
 
-    // Criar nova LocationPlatform com DTO
+    @CacheEvict(allEntries = true)
     public LocationPlatformResponseDTO create(LocationPlatformRequestDTO dto) {
         if (locationPlatformRepository.findAll().stream()
                 .anyMatch(lp -> lp.getName().equalsIgnoreCase(dto.getName()))) {
@@ -33,21 +35,24 @@ public class LocationPlatformService {
         return toResponseDTO(locationPlatformRepository.save(lp));
     }
 
-    // Buscar por ID e retornar como DTO
+    @Cacheable(key = "#id")
     public LocationPlatformResponseDTO findById(Long id) {
         LocationPlatform lp = locationPlatformRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
         return toResponseDTO(lp);
     }
 
-    // Listar todos como DTOs
+    @Cacheable
     public List<LocationPlatformResponseDTO> findAll() {
         return locationPlatformRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    // Atualizar um registro com base no DTO
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public LocationPlatformResponseDTO update(Long id, LocationPlatformRequestDTO dto) {
         LocationPlatform existing = locationPlatformRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
@@ -64,14 +69,16 @@ public class LocationPlatformService {
         return toResponseDTO(locationPlatformRepository.save(existing));
     }
 
-    // Deletar
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void delete(Long id) {
         LocationPlatform existing = locationPlatformRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
         locationPlatformRepository.delete(existing);
     }
 
-    // Conversão para DTO
     private LocationPlatformResponseDTO toResponseDTO(LocationPlatform entity) {
         LocationPlatformResponseDTO dto = new LocationPlatformResponseDTO();
         dto.setId(entity.getId());

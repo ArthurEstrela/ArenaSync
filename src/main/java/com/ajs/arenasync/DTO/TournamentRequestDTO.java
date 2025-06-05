@@ -7,26 +7,34 @@ import com.ajs.arenasync.Entities.Enums.TournamentType;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 
+@Schema(description = "Detalhes para a criação ou atualização de um torneio") // Anotação na classe do DTO
 public class TournamentRequestDTO {
 
     @NotBlank(message = "O nome do torneio é obrigatório.")
+    @Schema(description = "Nome do torneio", example = "Campeonato de Verão 2025")
     private String name;
 
     @NotBlank(message = "A modalidade é obrigatória.")
+    @Schema(description = "Modalidade do torneio (Ex: Futebol, Xadrez, LoL)", example = "Futebol")
     private String modality;
 
     @NotBlank(message = "As regras do torneio são obrigatórias.")
+    @Schema(description = "Regras específicas do torneio", example = "Regras FIFA, sistema de pontos, etc.")
     private String rules;
 
     @NotNull(message = "A data de início é obrigatória.")
     @FutureOrPresent(message = "A data de início deve ser hoje ou uma data futura.")
+    @Schema(description = "Data de início do torneio (formato YYYY-MM-DD)", example = "2025-07-01")
     private LocalDate startDate;
 
     @NotNull(message = "A data de término é obrigatória.")
+    @Schema(description = "Data de término do torneio (formato YYYY-MM-DD)", example = "2025-07-15")
     private LocalDate endDate;
 
     @NotNull(message = "O tipo de torneio (ESPORT ou SPORT) é obrigatório.")
+    @Schema(description = "Tipo de torneio (ESPORT para eletrônicos, SPORT para físicos)", example = "SPORT", allowableValues = {"SPORT", "ESPORT"})
     private TournamentType type;
 
     // Getters e Setters

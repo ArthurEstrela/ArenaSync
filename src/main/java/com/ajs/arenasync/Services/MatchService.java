@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.MatchRequestDTO;
@@ -21,6 +22,7 @@ import com.ajs.arenasync.Repositories.TeamRepository;
 import com.ajs.arenasync.Repositories.TournamentRepository;
 
 @Service
+@CacheConfig(cacheNames = "matches")
 public class MatchService {
 
     @Autowired
@@ -35,23 +37,30 @@ public class MatchService {
     @Autowired
     private LocationPlatformRepository locationPlatformRepository;
 
+    @CacheEvict(allEntries = true)
     public MatchResponseDTO saveFromDTO(MatchRequestDTO dto) {
         Match match = toEntity(dto);
         validateMatch(match);
         return toResponseDTO(matchRepository.save(match));
     }
 
+    @Cacheable(key = "#id")
     public MatchResponseDTO findById(Long id) {
         return toResponseDTO(matchRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Partida", id)));
     }
 
+    @Cacheable
     public List<MatchResponseDTO> findAll() {
         return matchRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         if (!matchRepository.existsById(id)) {
             throw new ResourceNotFoundException("Partida", id);

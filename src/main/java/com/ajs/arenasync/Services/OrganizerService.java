@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.OrganizerRequestDTO;
@@ -14,23 +15,27 @@ import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.ajs.arenasync.Repositories.OrganizerRepository;
 
 @Service
+@CacheConfig(cacheNames = "organizers")
 public class OrganizerService {
 
     @Autowired
     private OrganizerRepository organizerRepository;
 
+    @Cacheable(key = "#id")
     public OrganizerResponseDTO getOrganizerById(Long id) {
         Organizer organizer = organizerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer", id));
         return toResponseDTO(organizer);
     }
 
+    @Cacheable
     public List<OrganizerResponseDTO> getAllOrganizers() {
         return organizerRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @CacheEvict(allEntries = true)
     public OrganizerResponseDTO createOrganizer(OrganizerRequestDTO dto) {
         if (organizerRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new BusinessException("Já existe um organizador com este e-mail.");
@@ -44,6 +49,10 @@ public class OrganizerService {
         return toResponseDTO(organizerRepository.save(organizer));
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public OrganizerResponseDTO updateOrganizer(Long id, OrganizerRequestDTO dto) {
         Organizer existing = organizerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer", id));
@@ -68,6 +77,10 @@ public class OrganizerService {
         return toResponseDTO(organizerRepository.save(existing));
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteOrganizer(Long id) {
         Organizer existing = organizerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer", id));
@@ -79,7 +92,6 @@ public class OrganizerService {
         organizerRepository.delete(existing);
     }
 
-    // Conversões DTO <-> Entidade
     private Organizer toEntity(OrganizerRequestDTO dto) {
         Organizer organizer = new Organizer();
         organizer.setName(dto.getName());

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*; // Import estático
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +16,25 @@ import com.ajs.arenasync.DTO.ReviewResponseDTO;
 import com.ajs.arenasync.Services.ReviewService;
 
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation; // Importe esta anotação
+import io.swagger.v3.oas.annotations.tags.Tag; // Importe esta anotação
+import io.swagger.v3.oas.annotations.Parameter; // Importe esta anotação para documentar PathVariable
 
 @RestController
 @RequestMapping("/api/reviews")
+@Tag(name = "Review Management", description = "Operações para gerenciar avaliações de partidas e torneios") // Anotação na classe
 public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
 
     @PostMapping
+    @Operation(summary = "Criar nova avaliação", description = "Cria uma nova avaliação para uma partida ou torneio por um usuário")
     public ResponseEntity<ReviewResponseDTO> createReview(@Valid @RequestBody ReviewRequestDTO dto) {
         ReviewResponseDTO created = reviewService.save(dto);
-        // Adicionar link "self"
         created.add(linkTo(methodOn(ReviewController.class).getReviewById(created.getId())).withSelfRel());
         
         // Adicionar link para o usuário que fez a review
-        // Para isso, precisaríamos do ID do usuário. Se ReviewRequestDTO tem userId:
         if (dto.getUserId() != null) {
             try {
                 created.add(linkTo(methodOn(UserController.class).getUserById(dto.getUserId())).withRel("user"));
@@ -40,7 +43,6 @@ public class ReviewController {
             }
         }
         // Adicionar link para a partida ou torneio avaliado
-        // Se ReviewRequestDTO tem matchId ou tournamentId:
         if (dto.getMatchId() != null) {
              try {
                 created.add(linkTo(methodOn(MatchController.class).findById(dto.getMatchId())).withRel("match"));
@@ -59,32 +61,38 @@ public class ReviewController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReviewResponseDTO> getReviewById(@PathVariable Long id) {
+    @Operation(summary = "Obter avaliação por ID", description = "Retorna uma avaliação específica com base no seu ID")
+    public ResponseEntity<ReviewResponseDTO> getReviewById(
+            @Parameter(description = "ID da avaliação a ser buscada", required = true) @PathVariable Long id) {
         ReviewResponseDTO review = reviewService.findById(id);
-        // Adicionar link "self"
         review.add(linkTo(methodOn(ReviewController.class).getReviewById(id)).withSelfRel());
         review.add(linkTo(methodOn(ReviewController.class).getAllReviews()).withRel("all-reviews"));
+        review.add(linkTo(methodOn(ReviewController.class).deleteReview(id)).withRel("delete"));
 
-        // Para adicionar links ao usuário e à partida/torneio aqui,
-        // o ReviewResponseDTO precisaria conter os IDs ou o ReviewService precisaria
-        // fornecer informações para construir esses links.
-        // Exemplo simplificado (supondo que ReviewResponseDTO tenha esses IDs):
+
+        // Links para recursos relacionados (User, Match/Tournament)
+        // Se ReviewResponseDTO tivesse os IDs do usuário, partida ou torneio, você poderia adicionar os links aqui.
+        // Exemplo:
         // if (review.getUserId() != null) {
-        //     review.add(linkTo(methodOn(UserController.class).getUserById(review.getUserId())).withRel("user"));
+        //     try { review.add(linkTo(methodOn(UserController.class).getUserById(review.getUserId())).withRel("user")); } catch (Exception e) { }
         // }
-        // if ("match".equals(review.getReviewedEntityType()) && review.getReviewedEntityId() != null) {
-        //     review.add(linkTo(methodOn(MatchController.class).findById(review.getReviewedEntityId())).withRel("match"));
+        // if (review.getMatchId() != null) { // Supondo que você adicionasse getMatchId() ao ReviewResponseDTO
+        //     try { review.add(linkTo(methodOn(MatchController.class).findById(review.getMatchId())).withRel("match")); } catch (Exception e) { }
+        // } else if (review.getTournamentId() != null) { // Supondo que você adicionasse getTournamentId() ao ReviewResponseDTO
+        //     try { review.add(linkTo(methodOn(TournamentController.class).getTournamentById(review.getTournamentId())).withRel("tournament")); } catch (Exception e) { }
         // }
 
         return ResponseEntity.ok(review);
     }
 
     @GetMapping
+    @Operation(summary = "Listar todas as avaliações", description = "Retorna uma lista de todas as avaliações registradas")
     public ResponseEntity<CollectionModel<ReviewResponseDTO>> getAllReviews() {
         List<ReviewResponseDTO> reviewsList = reviewService.findAll();
         
         for (ReviewResponseDTO review : reviewsList) {
             review.add(linkTo(methodOn(ReviewController.class).getReviewById(review.getId())).withSelfRel());
+            review.add(linkTo(methodOn(ReviewController.class).deleteReview(review.getId())).withRel("delete"));
             // Adicionar outros links relevantes para cada item, se necessário (user, match/tournament)
         }
         Link selfLink = linkTo(methodOn(ReviewController.class).getAllReviews()).withSelfRel();
@@ -93,9 +101,11 @@ public class ReviewController {
         return ResponseEntity.ok(collectionModel);
     }
 
-    // DELETE - Respostas 204 não têm corpo para links.
+    // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long id) {
+    @Operation(summary = "Deletar avaliação", description = "Deleta uma avaliação do sistema pelo seu ID")
+    public ResponseEntity<Void> deleteReview(
+            @Parameter(description = "ID da avaliação a ser deletada", required = true) @PathVariable Long id) {
         reviewService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

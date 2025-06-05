@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.ReviewRequestDTO;
@@ -18,6 +19,7 @@ import com.ajs.arenasync.Repositories.ReviewRepository;
 import com.ajs.arenasync.Repositories.UserRepository;
 
 @Service
+@CacheConfig(cacheNames = "reviews") // define o nome do cache
 public class ReviewService {
 
     @Autowired
@@ -29,6 +31,7 @@ public class ReviewService {
     @Autowired
     private MatchRepository matchRepository;
 
+    @CacheEvict(value = "reviews", allEntries = true)
     public ReviewResponseDTO save(ReviewRequestDTO dto) {
         validateReview(dto);
 
@@ -38,18 +41,24 @@ public class ReviewService {
         return toResponseDTO(saved);
     }
 
+    @Cacheable(key = "#id")
     public ReviewResponseDTO findById(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Avaliação", id));
         return toResponseDTO(review);
     }
 
+    @Cacheable
     public List<ReviewResponseDTO> findAll() {
         return reviewRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         if (!reviewRepository.existsById(id)) {
             throw new ResourceNotFoundException("Avaliação", id);

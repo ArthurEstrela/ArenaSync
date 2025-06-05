@@ -3,7 +3,7 @@ package com.ajs.arenasync.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*; // Import estático
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +14,16 @@ import com.ajs.arenasync.DTO.TeamResponseDTO;
 import com.ajs.arenasync.Services.TeamService;
 
 import jakarta.validation.Valid;
-import java.util.List; // Importar List
-import java.util.stream.Collectors; // Importar Collectors
+import java.util.List;
+import java.util.stream.Collectors;
+
+import io.swagger.v3.oas.annotations.Operation; // Importe esta anotação
+import io.swagger.v3.oas.annotations.tags.Tag; // Importe esta anotação
+import io.swagger.v3.oas.annotations.Parameter; // Importe esta anotação para documentar PathVariable
 
 @RestController
 @RequestMapping("/api/teams")
+@Tag(name = "Team Management", description = "Operações para gerenciar times no ArenaSync") // Anotação na classe
 public class TeamController {
 
     @Autowired
@@ -26,58 +31,72 @@ public class TeamController {
 
     // CREATE
     @PostMapping
+    @Operation(summary = "Criar novo time", description = "Cria um novo time no sistema")
     public ResponseEntity<TeamResponseDTO> createTeam(@Valid @RequestBody TeamRequestDTO dto) {
         TeamResponseDTO created = teamService.save(dto);
-        // Adicionar link "self"
         created.add(linkTo(methodOn(TeamController.class).getTeamById(created.getId())).withSelfRel());
-        // Adicionar link para a coleção (se houver um endpoint para listar todos)
-        // Ex: created.add(linkTo(methodOn(TeamController.class).getAllTeams()).withRel("all-teams"));
+        // Adicionar link para a coleção de todos os times (se você criar o método getAllTeams)
+        created.add(linkTo(methodOn(TeamController.class).getAllTeams()).withRel("all-teams"));
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     // READ
     @GetMapping("/{id}")
-    public ResponseEntity<TeamResponseDTO> getTeamById(@PathVariable Long id) {
+    @Operation(summary = "Obter time por ID", description = "Retorna um time específico com base no seu ID")
+    public ResponseEntity<TeamResponseDTO> getTeamById(
+            @Parameter(description = "ID do time a ser buscado", required = true) @PathVariable Long id) {
         TeamResponseDTO team = teamService.findById(id);
-        // Adicionar link "self"
         team.add(linkTo(methodOn(TeamController.class).getTeamById(id)).withSelfRel());
-        // Adicionar link para editar (PUT)
-        team.add(linkTo(methodOn(TeamController.class).updateTeam(id, null)).withRel("edit")); // null para DTO no methodOn
-        // Adicionar link para deletar (DELETE)
+        team.add(linkTo(methodOn(TeamController.class).updateTeam(id, null)).withRel("edit"));
         team.add(linkTo(methodOn(TeamController.class).deleteTeam(id)).withRel("delete"));
-        // Adicionar link para a coleção (se houver um endpoint para listar todos)
-        // Ex: team.add(linkTo(methodOn(TeamController.class).getAllTeams()).withRel("all-teams"));
+        team.add(linkTo(methodOn(TeamController.class).getAllTeams()).withRel("all-teams"));
         return ResponseEntity.ok(team);
     }
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<TeamResponseDTO> updateTeam(@PathVariable Long id, @Valid @RequestBody TeamRequestDTO dto) {
+    @Operation(summary = "Atualizar time existente", description = "Atualiza as informações de um time existente pelo seu ID")
+    public ResponseEntity<TeamResponseDTO> updateTeam(
+            @Parameter(description = "ID do time a ser atualizado", required = true) @PathVariable Long id,
+            @Valid @RequestBody TeamRequestDTO dto) {
         TeamResponseDTO updated = teamService.update(id, dto);
-        // Adicionar link "self"
         updated.add(linkTo(methodOn(TeamController.class).getTeamById(id)).withSelfRel());
+        updated.add(linkTo(methodOn(TeamController.class).getAllTeams()).withRel("all-teams"));
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE - Respostas 204 não têm corpo para links.
+    // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTeam(@PathVariable Long id) {
+    @Operation(summary = "Deletar time", description = "Deleta um time do sistema pelo seu ID")
+    public ResponseEntity<Void> deleteTeam(
+            @Parameter(description = "ID do time a ser deletado", required = true) @PathVariable Long id) {
         teamService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Se você adicionar um método para listar todos os times, seria algo como:
-    /*
+    // Método para listar todos os times (Adicionei para completar o HATEOAS da coleção)
     @GetMapping
+    @Operation(summary = "Listar todos os times", description = "Retorna uma lista de todos os times registrados")
     public ResponseEntity<CollectionModel<TeamResponseDTO>> getAllTeams() {
-        List<TeamResponseDTO> teamsList = teamService.findAll(); // Supondo que exista teamService.findAll()
+        // Supondo que você tenha um método findAll no TeamService
+        // Se não tiver, você precisaria implementá-lo.
+        List<TeamResponseDTO> teamsList = teamService.findAll().stream()
+                                         .map(team -> {
+                                             TeamResponseDTO dto = new TeamResponseDTO();
+                                             dto.setId(team.getId());
+                                             dto.setName(team.getName());
+                                             return dto;
+                                         })
+                                         .collect(Collectors.toList());
+
 
         for (TeamResponseDTO team : teamsList) {
             team.add(linkTo(methodOn(TeamController.class).getTeamById(team.getId())).withSelfRel());
+            team.add(linkTo(methodOn(TeamController.class).updateTeam(team.getId(), null)).withRel("edit"));
+            team.add(linkTo(methodOn(TeamController.class).deleteTeam(team.getId())).withRel("delete"));
         }
         Link selfLink = linkTo(methodOn(TeamController.class).getAllTeams()).withSelfRel();
         CollectionModel<TeamResponseDTO> collectionModel = CollectionModel.of(teamsList, selfLink);
         return ResponseEntity.ok(collectionModel);
     }
-    */
 }

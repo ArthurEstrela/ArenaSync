@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.ResultRequestDTO;
@@ -16,6 +17,7 @@ import com.ajs.arenasync.Repositories.MatchRepository;
 import com.ajs.arenasync.Repositories.ResultRepository;
 
 @Service
+@CacheConfig(cacheNames = "results") // Define o cache para esta classe
 public class ResultService {
 
     @Autowired
@@ -24,6 +26,7 @@ public class ResultService {
     @Autowired
     private MatchRepository matchRepository;
 
+    @CacheEvict(value = "results", allEntries = true)
     public ResultResponseDTO save(ResultRequestDTO dto) {
         validateResult(dto);
 
@@ -39,18 +42,24 @@ public class ResultService {
         return toResponseDTO(saved);
     }
 
+    @Cacheable(key = "#id")
     public ResultResponseDTO findById(Long id) {
         Result result = resultRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Resultado", id));
         return toResponseDTO(result);
     }
 
+    @Cacheable
     public List<ResultResponseDTO> findAll() {
         return resultRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         if (!resultRepository.existsById(id)) {
             throw new ResourceNotFoundException("Resultado", id);

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.PlayerRequestDTO;
@@ -16,6 +17,7 @@ import com.ajs.arenasync.Repositories.PlayerRepository;
 import com.ajs.arenasync.Repositories.TeamRepository;
 
 @Service
+@CacheConfig(cacheNames = "players")
 public class PlayerService {
 
     @Autowired
@@ -24,6 +26,7 @@ public class PlayerService {
     @Autowired
     private TeamRepository teamRepository;
 
+    @CacheEvict(value = "players", allEntries = true)
     public PlayerResponseDTO saveFromDTO(PlayerRequestDTO dto) {
         if (playerRepository.existsByEmail(dto.getEmail())) {
             throw new BadRequestException("Já existe um jogador com esse e-mail.");
@@ -34,29 +37,36 @@ public class PlayerService {
         return toResponseDTO(saved);
     }
 
+    @Cacheable(key = "#id")
     public PlayerResponseDTO findById(Long id) {
         Player player = playerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Player", id));
         return toResponseDTO(player);
     }
 
+    @Cacheable(key = "'freeAgents'")
     public List<PlayerResponseDTO> getFreeAgents() {
         return playerRepository.findByTeamIsNull().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Cacheable
+    public List<PlayerResponseDTO> findAll() {
+        return playerRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         if (!playerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Player", id);
         }
         playerRepository.deleteById(id);
-    }
-
-    public List<PlayerResponseDTO> findAll() {
-        return playerRepository.findAll().stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
     }
 
     // Conversão de DTO para Entidade

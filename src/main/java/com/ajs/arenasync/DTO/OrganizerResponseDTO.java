@@ -1,19 +1,34 @@
 package com.ajs.arenasync.DTO;
 
 import org.springframework.hateoas.RepresentationModel;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
+
 @JsonInclude(Include.NON_NULL)
+@Schema(description = "Detalhes do organizador retornado pela API") // Anotação na classe do DTO
 public class OrganizerResponseDTO extends RepresentationModel<OrganizerResponseDTO>{
 
+    @Schema(description = "ID único do organizador", example = "1")
     private Long id;
+
+    @Schema(description = "Nome do organizador", example = "Empresa Eventos Ltda.")
     private String name;
+
+    @Schema(description = "Endereço de e-mail do organizador", example = "contato@empresaeventos.com")
     private String email;
+
+    @Schema(description = "Número de telefone do organizador", example = "5511987654321")
     private String phoneNumber;
+
+    @Schema(description = "Nome da organização", example = "Mega Eventos S.A.")
     private String organizationName;
+
+    @Schema(description = "Biografia ou descrição do organizador", example = "Especialistas em eventos esportivos e de e-sports.")
     private String bio;
+
+    @Schema(description = "Links para redes sociais ou website do organizador", example = "linkedin.com/empresaeventos")
     private String socialLinks;
 
     // Getters e Setters

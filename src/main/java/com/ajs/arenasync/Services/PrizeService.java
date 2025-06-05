@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.PrizeRequestDTO;
@@ -16,6 +17,7 @@ import com.ajs.arenasync.Repositories.PrizeRepository;
 import com.ajs.arenasync.Repositories.TournamentRepository;
 
 @Service
+@CacheConfig(cacheNames = "prizes") // define o nome do cache
 public class PrizeService {
 
     @Autowired
@@ -24,6 +26,7 @@ public class PrizeService {
     @Autowired
     private TournamentRepository tournamentRepository;
 
+    @CacheEvict(value = "prizes", allEntries = true)
     public PrizeResponseDTO save(PrizeRequestDTO dto) {
         validatePrize(dto);
 
@@ -38,18 +41,24 @@ public class PrizeService {
         return toResponseDTO(prizeRepository.save(prize));
     }
 
+    @Cacheable(key = "#id")
     public PrizeResponseDTO findById(Long id) {
         Prize prize = prizeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prêmio", id));
         return toResponseDTO(prize);
     }
 
+    @Cacheable
     public List<PrizeResponseDTO> findAll() {
         return prizeRepository.findAll().stream()
                 .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         if (!prizeRepository.existsById(id)) {
             throw new ResourceNotFoundException("Prêmio", id);

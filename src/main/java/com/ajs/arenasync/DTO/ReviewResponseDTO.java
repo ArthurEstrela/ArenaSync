@@ -1,20 +1,33 @@
 package com.ajs.arenasync.DTO;
 
 import org.springframework.hateoas.RepresentationModel;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
+
 @JsonInclude(Include.NON_NULL)
+@Schema(description = "Detalhes da avaliação retornada pela API") // Anotação na classe do DTO
 public class ReviewResponseDTO extends RepresentationModel<ReviewResponseDTO> {
 
+    @Schema(description = "ID único da avaliação", example = "1")
     private Long id;
+
+    @Schema(description = "Nota da avaliação (de 1 a 5)", example = "5")
     private Integer rating;
+
+    @Schema(description = "Comentário da avaliação", example = "Excelente partida, muito bem organizada!")
     private String comment;
+
+    @Schema(description = "Nome do usuário que fez a avaliação", example = "Nome do Usuário")
     private String userName;
-    private String matchInfo;
-    private String tournamentName;
-    
+
+    @Schema(description = "Informações sobre a partida avaliada", example = "Partida ID: 201")
+    private String matchInfo; // Informações sobre a partida ou torneio avaliado
+
+    @Schema(description = "Nome do torneio avaliado (se aplicável)", example = "Campeonato Primavera")
+    private String tournamentName; // Pode ser preenchido se a review for de um torneio
+
     public Long getId() {
         return id;
     }
@@ -51,6 +64,4 @@ public class ReviewResponseDTO extends RepresentationModel<ReviewResponseDTO> {
     public void setTournamentName(String tournamentName) {
         this.tournamentName = tournamentName;
     }
-
-    
 }

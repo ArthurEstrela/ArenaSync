@@ -1,16 +1,25 @@
 package com.ajs.arenasync.DTO;
 
 import org.springframework.hateoas.RepresentationModel;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
+
 @JsonInclude(Include.NON_NULL)
+@Schema(description = "Detalhes do jogador retornado pela API") // Anotação na classe do DTO
 public class PlayerResponseDTO extends RepresentationModel<PlayerResponseDTO>{
 
+    @Schema(description = "ID único do jogador", example = "1")
     private Long id;
+
+    @Schema(description = "Nome completo do jogador", example = "Lionel Messi")
     private String name;
+
+    @Schema(description = "Endereço de e-mail do jogador", example = "lionel.messi@example.com")
     private String email;
+
+    @Schema(description = "Nome do time ao qual o jogador pertence (será nulo se for agente livre)", example = "Paris Saint-Germain")
     private String teamName; // Pode ser null se for agente livre
 
     // Getters e Setters

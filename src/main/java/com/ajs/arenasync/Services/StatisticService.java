@@ -1,6 +1,7 @@
 package com.ajs.arenasync.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.*;
 import org.springframework.stereotype.Service;
 
 import com.ajs.arenasync.DTO.StatisticRequestDTO;
@@ -12,7 +13,11 @@ import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.ajs.arenasync.Repositories.PlayerRepository;
 import com.ajs.arenasync.Repositories.StatisticRepository;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
+@CacheConfig(cacheNames = "statistics")
 public class StatisticService {
 
     @Autowired
@@ -21,6 +26,7 @@ public class StatisticService {
     @Autowired
     private PlayerRepository playerRepository;
 
+    @CacheEvict(value = {"statistics"}, allEntries = true)
     public StatisticResponseDTO save(StatisticRequestDTO dto) {
         validateStatistic(dto);
 
@@ -36,13 +42,24 @@ public class StatisticService {
         return toResponseDTO(statisticRepository.save(statistic));
     }
 
+    @Cacheable(key = "#id")
     public StatisticResponseDTO findById(Long id) {
         Statistic statistic = statisticRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Estatística", id));
         return toResponseDTO(statistic);
     }
 
+    @Cacheable
+    public List<StatisticResponseDTO> findAll() {
+        return statisticRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @CacheEvict(value = {"statistics"}, allEntries = true)
     public StatisticResponseDTO update(Long id, StatisticRequestDTO dto) {
+        validateStatistic(dto);
+
         Statistic existing = statisticRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Estatística", id));
 
@@ -50,7 +67,6 @@ public class StatisticService {
         existing.setWins(dto.getWins());
         existing.setScore(dto.getScore());
 
-        // Regras: se não quiser permitir trocar o player, remova essa parte
         Player player = playerRepository.findById(dto.getPlayerId())
                 .orElseThrow(() -> new BadRequestException("Jogador não encontrado."));
         existing.setPlayer(player);
@@ -58,6 +74,10 @@ public class StatisticService {
         return toResponseDTO(statisticRepository.save(existing));
     }
 
+    @Caching(evict = {
+        @CacheEvict(key = "#id"),
+        @CacheEvict(allEntries = true)
+    })
     public void deleteById(Long id) {
         Statistic existing = statisticRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Estatística", id));
