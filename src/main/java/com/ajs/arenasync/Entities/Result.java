@@ -12,7 +12,10 @@ public class Result implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "score_team_a") 
     private Integer scoreTeamA;
+
+    @Column(name = "score_team_b") 
     private Integer scoreTeamB;
 
     @OneToOne
@@ -68,8 +71,10 @@ public class Result implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Result)) return false;
+        if (this == obj)
+            return true;
+        if (!(obj instanceof Result))
+            return false;
         Result other = (Result) obj;
         return id != null && id.equals(other.getId());
     }

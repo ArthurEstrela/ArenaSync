@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,15 +18,13 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "game")
-public class Match implements Serializable{
+public class Match implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDateTime scheduledDateTime;
-    private Integer scoreTeamA;
-    private Integer scoreTeamB;
 
     @ManyToOne
     @JoinColumn(name = "tournament_id")
@@ -42,6 +41,12 @@ public class Match implements Serializable{
     @ManyToOne
     @JoinColumn(name = "team_b_id")
     private Team teamB;
+
+    @Column(name = "score_team_a")
+    private Integer scoreTeamA;
+
+    @Column(name = "score_team_b") 
+    private Integer scoreTeamB;
 
     @OneToOne(mappedBy = "match", cascade = CascadeType.ALL)
     private Result result;

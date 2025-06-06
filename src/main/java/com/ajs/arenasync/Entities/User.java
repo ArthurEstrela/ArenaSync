@@ -13,8 +13,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.persistence.Inheritance; // Importe esta anotação
+import jakarta.persistence.InheritanceType; // Importe esta anotação
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED) // ADICIONE ESTA LINHA!
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 

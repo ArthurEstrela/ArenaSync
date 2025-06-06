@@ -18,6 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Tournament implements Serializable {
@@ -28,8 +29,11 @@ public class Tournament implements Serializable {
     private Long id;
     @NotBlank(message = "O nome é obrigatório") // Não pode ser nulo ou vazio
     private String name;
-    @NotBlank(message = "O tipo é obrigatório") // Não pode ser nulo ou vazio
+
+    @NotNull(message = "O tipo é obrigatório") // Altere de @NotBlank para @NotNull
+    @Enumerated(EnumType.STRING) // ADICIONE ESTA LINHA!
     private TournamentType type;
+    
     @NotBlank(message = "A modalidade é obrigatório") // Não pode ser nulo ou vazio
     private String modality;
     private String rules;
@@ -54,7 +58,6 @@ public class Tournament implements Serializable {
     public Tournament() {
     }
 
-
     public Tournament(Long id, @NotBlank(message = "O nome é obrigatório") String name,
             @NotBlank(message = "O tipo é obrigatório") TournamentType type,
             @NotBlank(message = "A modalidade é obrigatório") String modality, String rules, LocalDate startDate,
@@ -74,8 +77,6 @@ public class Tournament implements Serializable {
         this.reviews = reviews;
         this.organizer = organizer;
     }
-
-
 
     public Long getId() {
         return id;
@@ -160,7 +161,6 @@ public class Tournament implements Serializable {
     public User getOrganizer() {
         return organizer;
     }
-   
 
     public void setOrganizer(User organizer) {
         this.organizer = organizer;

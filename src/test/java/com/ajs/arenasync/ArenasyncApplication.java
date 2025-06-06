@@ -2,10 +2,10 @@ package com.ajs.arenasync;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching; // Importe esta anotação
+import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
-@EnableCaching // Adicione esta anotação para habilitar o caching
+@EnableCaching
 public class ArenasyncApplication {
 
 	public static void main(String[] args) {
