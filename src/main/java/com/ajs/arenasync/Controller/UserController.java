@@ -1,7 +1,6 @@
 package com.ajs.arenasync.Controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
@@ -31,7 +30,9 @@ public class UserController {
 
     // Buscar usuário por ID
     @GetMapping("/{id}")
-    @Operation(summary = "Obter usuário por ID", description = "Retorna um usuário específico com base no seu ID") // Anotação no método
+    @Operation(summary = "Obter usuário por ID", description = "Retorna um usuário específico com base no seu ID") // Anotação
+                                                                                                                   // no
+                                                                                                                   // método
     public ResponseEntity<UserResponseDTO> getUserById(
             @Parameter(description = "ID do usuário a ser buscado", required = true) @PathVariable Long id) {
         UserResponseDTO user = userService.getUserById(id);

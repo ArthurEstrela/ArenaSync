@@ -2,7 +2,6 @@ package com.ajs.arenasync.DTO;
 
 import com.ajs.arenasync.Entities.Enums.TournamentType; // Importe este enum
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull; // Importe NotNull
 import io.swagger.v3.oas.annotations.media.Schema;
 

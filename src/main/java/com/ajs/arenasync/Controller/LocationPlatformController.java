@@ -58,7 +58,6 @@ public class LocationPlatformController {
     public ResponseEntity<LocationPlatformResponseDTO> create(
             @Valid @RequestBody LocationPlatformRequestDTO dto) {
         LocationPlatformResponseDTO created = locationPlatformService.create(dto);
-        // CORREÇÃO AQUI: Adiciona verificação de nulidade antes de adicionar links HATEOAS
         if (created != null) {
             created.add(linkTo(methodOn(LocationPlatformController.class).findById(created.getId())).withSelfRel());
             created.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));

@@ -29,7 +29,7 @@ public class MatchController {
 
     @PostMapping
     @Operation(summary = "Criar nova partida", description = "Cria uma nova partida com base nas equipes, torneio, local/plataforma e data/hora agendada")
-    public ResponseEntity<MatchResponseDTO> create(@RequestBody @Valid MatchRequestDTO dto) {
+    public ResponseEntity<MatchResponseDTO> create(@Valid @RequestBody MatchRequestDTO dto) {
         MatchResponseDTO created = matchService.saveFromDTO(dto);
         created.add(linkTo(methodOn(MatchController.class).findById(created.getId())).withSelfRel());
         created.add(linkTo(methodOn(MatchController.class).findAll()).withRel("all-matches"));

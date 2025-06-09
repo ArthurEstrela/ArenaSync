@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import com.ajs.arenasync.Entities.Enums.TournamentType;
 
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 
