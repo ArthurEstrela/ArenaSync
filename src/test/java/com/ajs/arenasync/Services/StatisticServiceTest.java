@@ -93,7 +93,6 @@ public class StatisticServiceTest {
     @Test
     void testSave_PlayerIdNull() {
         statisticRequestDTO.setPlayerId(null);
-        // A validação no service deve lançar BadRequestException
         assertThrows(BadRequestException.class, () -> {
             statisticService.save(statisticRequestDTO);
         });
@@ -104,26 +103,12 @@ public class StatisticServiceTest {
     @Test
     void testSave_NegativeValues() {
         statisticRequestDTO.setGamesPlayed(-1);
-        // A validação no service deve lançar BadRequestException
         assertThrows(BadRequestException.class, () -> {
             statisticService.save(statisticRequestDTO);
         });
 
-        statisticRequestDTO.setGamesPlayed(10); // reset
-        statisticRequestDTO.setWins(-1);
-        assertThrows(BadRequestException.class, () -> {
-            statisticService.save(statisticRequestDTO);
-        });
-        verify(playerRepository, never()).findById(anyLong()); // Não deve chegar a buscar o player
-        verify(statisticRepository, never()).save(any(Statistic.class));
-    }
-
-    @Test
-    void testSave_WinsGreaterThanGamesPlayed() {
-        statisticRequestDTO.setWins(11); // gamesPlayed é 10
         statisticRequestDTO.setGamesPlayed(10);
-
-        // A validação no service deve lançar BadRequestException
+        statisticRequestDTO.setWins(-1);
         assertThrows(BadRequestException.class, () -> {
             statisticService.save(statisticRequestDTO);
         });
@@ -131,6 +116,17 @@ public class StatisticServiceTest {
         verify(statisticRepository, never()).save(any(Statistic.class));
     }
 
+    @Test
+    void testSave_WinsGreaterThanGamesPlayed() {
+        statisticRequestDTO.setWins(11);
+        statisticRequestDTO.setGamesPlayed(10);
+
+        assertThrows(BadRequestException.class, () -> {
+            statisticService.save(statisticRequestDTO);
+        });
+        verify(playerRepository, never()).findById(anyLong());
+        verify(statisticRepository, never()).save(any(Statistic.class));
+    }
 
     @Test
     void testFindById_Success() {
@@ -157,7 +153,7 @@ public class StatisticServiceTest {
     @Test
     void testUpdate_Success() {
         StatisticRequestDTO updateDto = new StatisticRequestDTO();
-        updateDto.setPlayerId(playerId); // Pode ou não mudar o jogador, aqui mantemos
+        updateDto.setPlayerId(playerId);
         updateDto.setGamesPlayed(12);
         updateDto.setWins(6);
         updateDto.setScore(120);
@@ -170,7 +166,7 @@ public class StatisticServiceTest {
         updatedStatistic.setScore(updateDto.getScore());
 
         when(statisticRepository.findById(statisticId)).thenReturn(Optional.of(statistic));
-        when(playerRepository.findById(playerId)).thenReturn(Optional.of(player)); // Assumindo que o player existe
+        when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
         when(statisticRepository.save(any(Statistic.class))).thenReturn(updatedStatistic);
 
         StatisticResponseDTO responseDTO = statisticService.update(statisticId, updateDto);
@@ -187,7 +183,9 @@ public class StatisticServiceTest {
     void testUpdate_StatisticNotFound() {
         StatisticRequestDTO updateDto = new StatisticRequestDTO();
         updateDto.setPlayerId(playerId);
-        updateDto.setGamesPlayed(12);
+        updateDto.setGamesPlayed(10);
+        updateDto.setWins(5);
+        updateDto.setScore(100); // Garante que todos os campos NotNull estão preenchidos para evitar NPE
 
         when(statisticRepository.findById(statisticId)).thenReturn(Optional.empty());
 
@@ -204,7 +202,9 @@ public class StatisticServiceTest {
         StatisticRequestDTO updateDto = new StatisticRequestDTO();
         Long newPlayerId = 2L;
         updateDto.setPlayerId(newPlayerId);
-        updateDto.setGamesPlayed(12);
+        updateDto.setGamesPlayed(10);
+        updateDto.setWins(5);
+        updateDto.setScore(100); // Garante que todos os campos NotNull estão preenchidos para evitar NPE
 
         when(statisticRepository.findById(statisticId)).thenReturn(Optional.of(statistic));
         when(playerRepository.findById(newPlayerId)).thenReturn(Optional.empty());

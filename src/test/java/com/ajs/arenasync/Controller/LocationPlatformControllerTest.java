@@ -60,18 +60,19 @@ public class LocationPlatformControllerTest {
         mockMvc.perform(post("/api/location-platforms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isOk()) // Seu controller retorna Ok
+                .andExpect(status().isCreated()) // CORREÇÃO AQUI: Espera 201 Created
                 .andExpect(jsonPath("$.name", is(responseDTO.getName())));
     }
 
     @Test
     void createLocationPlatform_InvalidDTO_NameBlank() throws Exception {
-        requestDTO.setName(""); // Viola @NotBlank
+        requestDTO.setName("");
 
         mockMvc.perform(post("/api/location-platforms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
                 .andExpect(status().isBadRequest());
+                // Removidas asserções jsonPath que acessariam o DTO 'created'
     }
 
     @Test
@@ -82,7 +83,7 @@ public class LocationPlatformControllerTest {
         mockMvc.perform(post("/api/location-platforms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isInternalServerError()); // GlobalExceptionHandler mapeia BusinessException para 500
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -91,6 +92,7 @@ public class LocationPlatformControllerTest {
 
         mockMvc.perform(get("/api/location-platforms/{id}", locationId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(locationId.intValue())))
                 .andExpect(jsonPath("$.name", is(responseDTO.getName())));
     }
@@ -109,8 +111,9 @@ public class LocationPlatformControllerTest {
 
         mockMvc.perform(get("/api/location-platforms"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is(responseDTO.getName())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.locationPlatformResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.locationPlatformResponseDTOList[0].name", is(responseDTO.getName())));
     }
     
     @Test
@@ -119,7 +122,9 @@ public class LocationPlatformControllerTest {
 
         mockMvc.perform(get("/api/location-platforms"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
 

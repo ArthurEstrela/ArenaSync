@@ -57,7 +57,6 @@ public class ReviewServiceTest {
 
         match = new Match();
         match.setId(matchId);
-        // Defina outros campos de Match se necessário para `setMatchInfo` no DTO de resposta
 
         review = new Review();
         review.setId(reviewId);
@@ -68,16 +67,17 @@ public class ReviewServiceTest {
 
         reviewRequestDTO = new ReviewRequestDTO();
         reviewRequestDTO.setUserId(userId);
-        reviewRequestDTO.setMatchId(matchId); // Obrigatório pela validação
+        reviewRequestDTO.setMatchId(matchId);
         reviewRequestDTO.setRating(5);
         reviewRequestDTO.setComment("Great DTO comment!");
     }
 
     @Test
     void testSave_Success() {
+        // CORREÇÃO: existeByUserIdAndMatchId deve ser mockado para falso, pois a validação é executada antes da busca de user/match
+        when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(false);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
-        when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(false);
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> {
             Review saved = invocation.getArgument(0);
             saved.setId(reviewId);
@@ -98,36 +98,38 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_UserNotFound() {
+        // CORREÇÃO: existsByUserIdAndMatchId deve ser mockado para falso
+        when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(false); // Adicionado para evitar NeverWantedButInvoked
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        // A validação ocorre em toEntity, antes de existsByUserIdAndMatchId
 
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTO);
         });
         verify(userRepository, times(1)).findById(userId);
         verify(matchRepository, never()).findById(anyLong());
-        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong());
+        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(userId, matchId); // Agora é esperado
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
     void testSave_MatchNotFound() {
+        // CORREÇÃO: existsByUserIdAndMatchId deve ser mockado para falso
+        when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(false); // Adicionado para evitar NeverWantedButInvoked
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.empty());
-        // A validação ocorre em toEntity, antes de existsByUserIdAndMatchId
 
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTO);
         });
         verify(userRepository, times(1)).findById(userId);
         verify(matchRepository, times(1)).findById(matchId);
-        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong());
+        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(userId, matchId); // Agora é esperado
         verify(reviewRepository, never()).save(any(Review.class));
     }
     
     @Test
     void testSave_MatchIdNull() {
-        reviewRequestDTO.setMatchId(null); // Obrigatório pela validateReview
+        reviewRequestDTO.setMatchId(null);
         
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTO);
@@ -142,15 +144,11 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_UserAlreadyReviewedMatch() {
-        // Não precisa mockar userRepository e matchRepository aqui, pois a checagem de duplicidade
-        // acontece antes de chamá-los se a validação de duplicidade estiver primeiro.
-        // Na sua implementação, a validação vem primeiro.
         when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTO);
         });
-        // user e match não são buscados se existsByUserIdAndMatchId for true
         verify(userRepository, never()).findById(userId);
         verify(matchRepository, never()).findById(matchId);
         verify(reviewRepository, times(1)).existsByUserIdAndMatchId(userId, matchId);
@@ -160,7 +158,7 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_InvalidRatingTooLow() {
-        reviewRequestDTO.setRating(0); // Rating inválido
+        reviewRequestDTO.setRating(0);
         
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTO);
@@ -170,7 +168,7 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_InvalidRatingTooHigh() {
-        reviewRequestDTO.setRating(6); // Rating inválido
+        reviewRequestDTO.setRating(6);
         
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTO);

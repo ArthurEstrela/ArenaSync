@@ -73,7 +73,7 @@ public class OrganizerControllerTest {
 
     @Test
     void createOrganizer_InvalidDTO_EmailInvalid() throws Exception {
-        organizerRequestDTO.setEmail("invalid-email"); // Viola @Email
+        organizerRequestDTO.setEmail("invalid-email");
 
         mockMvc.perform(post("/api/organizers")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ public class OrganizerControllerTest {
         mockMvc.perform(post("/api/organizers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(organizerRequestDTO)))
-                .andExpect(status().isInternalServerError()); // GlobalExceptionHandler mapeia BusinessException para 500
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -98,6 +98,7 @@ public class OrganizerControllerTest {
 
         mockMvc.perform(get("/api/organizers/{id}", organizerId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(organizerId.intValue())))
                 .andExpect(jsonPath("$.name", is(organizerResponseDTO.getName())));
     }
@@ -116,8 +117,9 @@ public class OrganizerControllerTest {
 
         mockMvc.perform(get("/api/organizers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is(organizerResponseDTO.getName())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.organizerResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.organizerResponseDTOList[0].name", is(organizerResponseDTO.getName())));
     }
     
     @Test
@@ -126,7 +128,9 @@ public class OrganizerControllerTest {
 
         mockMvc.perform(get("/api/organizers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
 

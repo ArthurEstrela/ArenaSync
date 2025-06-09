@@ -16,13 +16,13 @@ import com.ajs.arenasync.DTO.PrizeResponseDTO;
 import com.ajs.arenasync.Services.PrizeService;
 
 import jakarta.validation.Valid;
-import io.swagger.v3.oas.annotations.Operation; // Importe esta anotação
-import io.swagger.v3.oas.annotations.tags.Tag; // Importe esta anotação
-import io.swagger.v3.oas.annotations.Parameter; // Importe esta anotação para documentar PathVariable
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @RestController
 @RequestMapping("/api/prizes")
-@Tag(name = "Prize Management", description = "Operações para gerenciar prêmios de torneios") // Anotação na classe
+@Tag(name = "Prize Management", description = "Operações para gerenciar prêmios de torneios")
 public class PrizeController {
 
     @Autowired
@@ -32,16 +32,19 @@ public class PrizeController {
     @Operation(summary = "Criar novo prêmio", description = "Cria um novo prêmio e o associa a um torneio existente")
     public ResponseEntity<PrizeResponseDTO> createPrize(@Valid @RequestBody PrizeRequestDTO dto) {
         PrizeResponseDTO created = prizeService.save(dto);
-        created.add(linkTo(methodOn(PrizeController.class).getPrizeById(created.getId())).withSelfRel());
-        // Adicionar link para o torneio relacionado
-        if (dto.getTournamentId() != null) {
-            try {
-                created.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
-            } catch (Exception e) {
-                 System.err.println("Erro ao tentar gerar link para tournament em createPrize: " + e.getMessage());
+        // CORREÇÃO AQUI: Adiciona verificação de nulidade antes de adicionar links HATEOAS
+        if (created != null) {
+            created.add(linkTo(methodOn(PrizeController.class).getPrizeById(created.getId())).withSelfRel());
+            // Adicionar link para o torneio relacionado
+            if (dto.getTournamentId() != null) {
+                try {
+                    created.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
+                } catch (Exception e) {
+                     System.err.println("Erro ao tentar gerar link para tournament em createPrize: " + e.getMessage());
+                }
             }
+            created.add(linkTo(methodOn(PrizeController.class).getAllPrizes()).withRel("all-prizes"));
         }
-        created.add(linkTo(methodOn(PrizeController.class).getAllPrizes()).withRel("all-prizes"));
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
@@ -52,29 +55,19 @@ public class PrizeController {
         PrizeResponseDTO prize = prizeService.findById(id);
         prize.add(linkTo(methodOn(PrizeController.class).getPrizeById(id)).withSelfRel());
         prize.add(linkTo(methodOn(PrizeController.class).getAllPrizes()).withRel("all-prizes"));
-        prize.add(linkTo(methodOn(PrizeController.class).deletePrize(id)).withRel("delete")); // Link para DELETE
+        prize.add(linkTo(methodOn(PrizeController.class).deletePrize(id)).withRel("delete"));
         
-        // Se PrizeResponseDTO tivesse tournamentId, poderíamos adicionar o link para o torneio aqui.
-        // Exemplo:
-        // if (prize.getTournamentId() != null) { // Supondo que PrizeResponseDTO tivesse getTournamentId()
-        //     try {
-        //        prize.add(linkTo(methodOn(TournamentController.class).getTournamentById(prize.getTournamentId())).withRel("tournament"));
-        //     } catch (Exception e) {
-        //        System.err.println("Erro ao tentar gerar link para tournament em getPrizeById: " + e.getMessage());
-        //     }
-        // }
         return ResponseEntity.ok(prize);
     }
 
     @GetMapping
     @Operation(summary = "Listar todos os prêmios", description = "Retorna uma lista de todos os prêmios registrados")
     public ResponseEntity<CollectionModel<PrizeResponseDTO>> getAllPrizes() {
-        List<PrizeResponseDTO> prizesList = prizeService.findAll(); // Assume que PrizeService.findAll() existe e retorna List<PrizeResponseDTO>
+        List<PrizeResponseDTO> prizesList = prizeService.findAll();
         
         for (PrizeResponseDTO prize : prizesList) {
             prize.add(linkTo(methodOn(PrizeController.class).getPrizeById(prize.getId())).withSelfRel());
             prize.add(linkTo(methodOn(PrizeController.class).deletePrize(prize.getId())).withRel("delete"));
-            // Adicionar link para o respectivo torneio se a informação (ID) estiver disponível no DTO
         }
         Link selfLink = linkTo(methodOn(PrizeController.class).getAllPrizes()).withSelfRel();
         CollectionModel<PrizeResponseDTO> collectionModel = CollectionModel.of(prizesList, selfLink);
@@ -82,7 +75,6 @@ public class PrizeController {
         return ResponseEntity.ok(collectionModel);
     }
 
-    // DELETE
     @DeleteMapping("/{id}")
     @Operation(summary = "Deletar prêmio", description = "Deleta um prêmio do sistema pelo seu ID")
     public ResponseEntity<Void> deletePrize(

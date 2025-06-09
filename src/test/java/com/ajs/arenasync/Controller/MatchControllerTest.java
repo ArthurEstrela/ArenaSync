@@ -6,7 +6,7 @@ import com.ajs.arenasync.Services.MatchService;
 import com.ajs.arenasync.Exceptions.BadRequestException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule; // Importante para LocalDateTime
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,6 @@ public class MatchControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Registrar o módulo para lidar com datas Java 8 (LocalDateTime)
         objectMapper.registerModule(new JavaTimeModule());
 
         matchRequestDTO = new MatchRequestDTO();
@@ -52,7 +51,7 @@ public class MatchControllerTest {
         matchRequestDTO.setTeamBId(2L);
         matchRequestDTO.setTournamentId(1L);
         matchRequestDTO.setLocationPlatformId(1L);
-        matchRequestDTO.setScheduledDateTime(LocalDateTime.now().plusHours(24)); // Data futura
+        matchRequestDTO.setScheduledDateTime(LocalDateTime.now().plusHours(24));
         matchRequestDTO.setScoreTeamA(null);
         matchRequestDTO.setScoreTeamB(null);
 
@@ -74,18 +73,18 @@ public class MatchControllerTest {
         mockMvc.perform(post("/api/matches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(matchRequestDTO)))
-                .andExpect(status().isOk()) // Seu controller retorna Ok, não Created
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.teamAName", is(matchResponseDTO.getTeamAName())));
     }
 
     @Test
     void createMatch_InvalidDTO_ScheduledDateTimeInPast() throws Exception {
-        matchRequestDTO.setScheduledDateTime(LocalDateTime.now().minusHours(1)); // Data no passado, viola @Future
+        matchRequestDTO.setScheduledDateTime(LocalDateTime.now().minusHours(1));
 
         mockMvc.perform(post("/api/matches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(matchRequestDTO)))
-                .andExpect(status().isBadRequest()); // @Valid falhará
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -105,6 +104,7 @@ public class MatchControllerTest {
 
         mockMvc.perform(get("/api/matches/{id}", matchId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(matchId.intValue())))
                 .andExpect(jsonPath("$.teamAName", is(matchResponseDTO.getTeamAName())));
     }
@@ -123,8 +123,9 @@ public class MatchControllerTest {
 
         mockMvc.perform(get("/api/matches"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].teamAName", is(matchResponseDTO.getTeamAName())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.matchResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.matchResponseDTOList[0].teamAName", is(matchResponseDTO.getTeamAName())));
     }
     
     @Test
@@ -133,7 +134,9 @@ public class MatchControllerTest {
 
         mockMvc.perform(get("/api/matches"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
     @Test

@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class LocationPlatform implements Serializable{
@@ -24,6 +25,7 @@ public class LocationPlatform implements Serializable{
     @NotBlank(message = "O nome é obrigatório")  // Não pode ser nulo ou vazio
     private String name;
     @Enumerated(EnumType.STRING) 
+    @NotNull(message = "O Tipo é obrigatório")
     private TournamentType type;
     private String description;
     @OneToMany(mappedBy = "locationPlatform")

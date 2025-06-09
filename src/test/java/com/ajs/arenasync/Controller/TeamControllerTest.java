@@ -6,6 +6,10 @@ import com.ajs.arenasync.Services.TeamService;
 import com.ajs.arenasync.Exceptions.BadRequestException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+
+
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.Collections;
+
+import static org.hamcrest.Matchers.hasSize; 
 
 @WebMvcTest(TeamController.class)
 public class TeamControllerTest {
@@ -60,12 +68,12 @@ public class TeamControllerTest {
 
     @Test
     void createTeam_InvalidDTO_NameBlank() throws Exception {
-        teamRequestDTO.setName(""); // Viola @NotBlank
+        teamRequestDTO.setName("");
 
         mockMvc.perform(post("/api/teams")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamRequestDTO)))
-                .andExpect(status().isBadRequest()); // @Valid falhará
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -76,7 +84,7 @@ public class TeamControllerTest {
         mockMvc.perform(post("/api/teams")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(teamRequestDTO)))
-                .andExpect(status().isBadRequest()); // GlobalExceptionHandler mapeia BadRequestException para 400
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -85,6 +93,7 @@ public class TeamControllerTest {
 
         mockMvc.perform(get("/api/teams/{id}", teamId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(teamId.intValue())))
                 .andExpect(jsonPath("$.name", is(teamResponseDTO.getName())));
     }
@@ -146,4 +155,29 @@ public class TeamControllerTest {
         mockMvc.perform(delete("/api/teams/{id}", teamId))
                 .andExpect(status().isNotFound());
     }
+
+    // Este método testará o getAllTeams() do controlador real.
+    // Ele não deve ser o método getAllTeams() do controlador copiado para cá.
+    @Test
+    void testGetAllTeams_Success() throws Exception {
+        when(teamService.findAll()).thenReturn(Collections.singletonList(teamResponseDTO)); // Mocka o serviço
+
+        mockMvc.perform(get("/api/teams")) // Chama o endpoint do controlador
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json"))) // Espera HATEOAS
+                .andExpect(jsonPath("$._embedded.teamResponseDTOList", hasSize(1))) // Verifica a estrutura HATEOAS
+                .andExpect(jsonPath("$._embedded.teamResponseDTOList[0].name", is(teamResponseDTO.getName())));
+    }
+
+    @Test
+    void testGetAllTeams_Empty() throws Exception {
+        when(teamService.findAll()).thenReturn(Collections.emptyList()); // Mocka o serviço para retornar vazio
+
+        mockMvc.perform(get("/api/teams")) // Chama o endpoint do controlador
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json"))) // Espera HATEOAS
+                .andExpect(jsonPath("$._embedded").doesNotExist()) // Não deve ter _embedded se a lista estiver vazia
+                .andExpect(jsonPath("$._links").exists()); // Mas deve ter os links HATEOAS
+    }
+
 }

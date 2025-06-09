@@ -10,6 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
@@ -31,8 +32,8 @@ public class Player extends User implements Serializable {
     }
 
 
-    public Player(Long id, @NotBlank(message = "O nome é obrigatório") String name,
-            @NotBlank(message = "A idade é obrigatório") Integer age,
+    public Player(Long id, @NotNull(message = "O nome é obrigatório") String name,
+            @NotNull(message = "A idade é obrigatório") Integer age,
             @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres") String password,
             @Email(message = "Email inválido") String email, List<Tournament> tournaments, List<Review> reviews,
             String position, Team team) {

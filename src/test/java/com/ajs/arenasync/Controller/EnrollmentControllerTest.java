@@ -62,13 +62,13 @@ public class EnrollmentControllerTest {
         mockMvc.perform(post("/api/enrollments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isOk()) // Seu controller retorna Ok
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.teamName", is(responseDTO.getTeamName())));
     }
 
     @Test
     void createEnrollment_InvalidDTO_StatusNull() throws Exception {
-        requestDTO.setStatus(null); // Viola @NotNull
+        requestDTO.setStatus(null);
 
         mockMvc.perform(post("/api/enrollments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,6 +93,7 @@ public class EnrollmentControllerTest {
 
         mockMvc.perform(get("/api/enrollments/{id}", enrollmentId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(enrollmentId.intValue())))
                 .andExpect(jsonPath("$.teamName", is(responseDTO.getTeamName())));
     }
@@ -111,8 +112,9 @@ public class EnrollmentControllerTest {
 
         mockMvc.perform(get("/api/enrollments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].teamName", is(responseDTO.getTeamName())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.enrollmentResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.enrollmentResponseDTOList[0].teamName", is(responseDTO.getTeamName())));
     }
     
     @Test
@@ -121,7 +123,9 @@ public class EnrollmentControllerTest {
 
         mockMvc.perform(get("/api/enrollments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
 

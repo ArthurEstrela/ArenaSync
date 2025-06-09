@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 @Schema(description = "Detalhes para a criação de um prêmio") // Anotação na classe do DTO
 public class PrizeRequestDTO {
 
-    @NotBlank(message = "A descrição do prêmio é obrigatória.")
+    @NotNull(message = "A descrição do prêmio é obrigatória.")
     @Schema(description = "Descrição do prêmio (ex: Troféu de Ouro, Medalha)", example = "Troféu de Ouro")
     private String description;
 

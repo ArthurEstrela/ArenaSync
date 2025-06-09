@@ -46,9 +46,9 @@ public class ResultControllerTest {
         resultRequestDTO = new ResultRequestDTO();
         resultRequestDTO.setMatchId(matchId);
         resultRequestDTO.setScoreTeamA(3);
-        resultRequestDTO.setScoreTeamB(2);
-
-        resultResponseDTO = new ResultResponseDTO();
+        resultRequestDTO.setScoreTeamB(2); // Garante que não é null
+        
+        resultResponseDTO = new ResultResponseDTO(); // Inicializa o DTO de resposta
         resultResponseDTO.setId(resultId);
         resultResponseDTO.setMatchId(matchId);
         resultResponseDTO.setScoreTeamA(3);
@@ -68,7 +68,7 @@ public class ResultControllerTest {
 
     @Test
     void createResult_InvalidDTO_MatchIdNull() throws Exception {
-        resultRequestDTO.setMatchId(null); // Viola @NotNull
+        resultRequestDTO.setMatchId(null);
 
         mockMvc.perform(post("/api/results")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,6 +105,7 @@ public class ResultControllerTest {
 
         mockMvc.perform(get("/api/results/{id}", resultId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(resultId.intValue())))
                 .andExpect(jsonPath("$.scoreTeamA", is(resultResponseDTO.getScoreTeamA())));
     }
@@ -123,8 +124,9 @@ public class ResultControllerTest {
 
         mockMvc.perform(get("/api/results"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].scoreTeamA", is(resultResponseDTO.getScoreTeamA())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.resultResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.resultResponseDTOList[0].scoreTeamA", is(resultResponseDTO.getScoreTeamA())));
     }
 
     @Test
@@ -133,8 +135,11 @@ public class ResultControllerTest {
 
         mockMvc.perform(get("/api/results"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
+
 
     @Test
     void deleteResult_Success() throws Exception {

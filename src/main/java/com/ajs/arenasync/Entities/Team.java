@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Team implements Serializable {
@@ -19,7 +20,7 @@ public class Team implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "O nome é obrigatório") // Não pode ser nulo ou vazio
+    @NotNull(message = "O nome é obrigatório") // Não pode ser nulo ou vazio
     private String name;
     private String imageUrl;
     private String description;

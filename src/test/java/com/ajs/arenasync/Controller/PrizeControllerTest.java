@@ -68,7 +68,7 @@ public class PrizeControllerTest {
 
     @Test
     void createPrize_InvalidDTO_DescriptionBlank() throws Exception {
-        prizeRequestDTO.setDescription(""); // Viola @NotBlank
+        prizeRequestDTO.setDescription("");
 
         mockMvc.perform(post("/api/prizes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,6 +93,7 @@ public class PrizeControllerTest {
 
         mockMvc.perform(get("/api/prizes/{id}", prizeId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(prizeId.intValue())))
                 .andExpect(jsonPath("$.description", is(prizeResponseDTO.getDescription())));
     }
@@ -111,8 +112,9 @@ public class PrizeControllerTest {
 
         mockMvc.perform(get("/api/prizes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].description", is(prizeResponseDTO.getDescription())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.prizeResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.prizeResponseDTOList[0].description", is(prizeResponseDTO.getDescription())));
     }
     
     @Test
@@ -121,7 +123,9 @@ public class PrizeControllerTest {
 
         mockMvc.perform(get("/api/prizes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
     @Test

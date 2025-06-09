@@ -17,8 +17,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -47,7 +53,7 @@ public class TournamentControllerTest {
 
     @BeforeEach
     void setUp() {
-        objectMapper.registerModule(new JavaTimeModule()); // Para serializar/desserializar LocalDate
+        objectMapper.registerModule(new JavaTimeModule());
 
         tournamentRequestDTO = new TournamentRequestDTO();
         tournamentRequestDTO.setName("Spring Championship");
@@ -109,7 +115,7 @@ public class TournamentControllerTest {
         mockMvc.perform(post("/api/tournaments/organizer/{organizerId}", organizerId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(tournamentRequestDTO)))
-                .andExpect(status().isInternalServerError()); // GlobalExceptionHandler mapeia BusinessException para 500
+                .andExpect(status().isInternalServerError());
     }
 
 
@@ -119,6 +125,7 @@ public class TournamentControllerTest {
 
         mockMvc.perform(get("/api/tournaments/{id}", tournamentId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(tournamentId.intValue())))
                 .andExpect(jsonPath("$.name", is(tournamentResponseDTO.getName())));
     }
@@ -132,22 +139,35 @@ public class TournamentControllerTest {
     }
 
     @Test
-    void getAllTournaments_Success() throws Exception {
-        when(tournamentService.getAllTournaments()).thenReturn(Collections.singletonList(tournamentResponseDTO));
+    void getAllTournaments_Success_Paged() throws Exception {
+        List<TournamentResponseDTO> content = Collections.singletonList(tournamentResponseDTO);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<TournamentResponseDTO> page = new PageImpl<>(content, pageable, 1);
 
-        mockMvc.perform(get("/api/tournaments"))
+        when(tournamentService.getAllTournaments(any(Pageable.class))).thenReturn(page);
+
+        mockMvc.perform(get("/api/tournaments?page=0&size=10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is(tournamentResponseDTO.getName())));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)) // CORREÇÃO AQUI: Espera JSON simples para Page
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is(tournamentResponseDTO.getName())))
+                .andExpect(jsonPath("$.pageable.pageNumber", is(0)))
+                .andExpect(jsonPath("$.pageable.pageSize", is(10)))
+                .andExpect(jsonPath("$.totalElements", is(1)));
     }
     
     @Test
-    void getAllTournaments_Empty() throws Exception {
-        when(tournamentService.getAllTournaments()).thenReturn(Collections.emptyList());
+    void getAllTournaments_Empty_Paged() throws Exception {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<TournamentResponseDTO> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
 
-        mockMvc.perform(get("/api/tournaments"))
+        when(tournamentService.getAllTournaments(any(Pageable.class))).thenReturn(emptyPage);
+
+        mockMvc.perform(get("/api/tournaments?page=0&size=10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON)) // CORREÇÃO AQUI: Espera JSON simples para Page
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.totalElements", is(0)));
     }
 
     @Test
@@ -199,7 +219,7 @@ public class TournamentControllerTest {
 
     @Test
     void startTournament_Success() throws Exception {
-        tournamentResponseDTO.setStatus(TournamentStatus.ONGOING); // Simula o status após iniciar
+        tournamentResponseDTO.setStatus(TournamentStatus.ONGOING);
         when(tournamentService.startTournament(tournamentId)).thenReturn(tournamentResponseDTO);
 
         mockMvc.perform(post("/api/tournaments/{id}/start", tournamentId))
@@ -228,7 +248,7 @@ public class TournamentControllerTest {
 
     @Test
     void finishTournament_Success() throws Exception {
-        tournamentResponseDTO.setStatus(TournamentStatus.FINISHED); // Simula o status após finalizar
+        tournamentResponseDTO.setStatus(TournamentStatus.FINISHED);
         when(tournamentService.finishTournament(tournamentId)).thenReturn(tournamentResponseDTO);
 
         mockMvc.perform(post("/api/tournaments/{id}/finish", tournamentId))

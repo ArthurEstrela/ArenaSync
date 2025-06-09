@@ -2,25 +2,26 @@ package com.ajs.arenasync.DTO;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 
 @Schema(description = "Detalhes para a criação ou atualização de um organizador") // Anotação na classe do DTO
 public class OrganizerRequestDTO {
 
-    @NotBlank(message = "O nome é obrigatório.")
+    @NotNull(message = "O nome é obrigatório.")
     @Schema(description = "Nome do organizador", example = "Empresa Eventos Ltda.")
     private String name;
 
-    @NotBlank(message = "O e-mail é obrigatório.")
+    @NotNull(message = "O e-mail é obrigatório.")
     @Email(message = "E-mail inválido.")
     @Schema(description = "Endereço de e-mail do organizador (deve ser único)", example = "contato@empresaeventos.com")
     private String email;
 
-    @NotBlank(message = "O número de telefone é obrigatório.")
+    @NotNull(message = "O número de telefone é obrigatório.")
     @Schema(description = "Número de telefone do organizador", example = "5511987654321")
     private String phoneNumber;
 
-    @NotBlank(message = "O nome da organização é obrigatório.")
+    @NotNull(message = "O nome da organização é obrigatório.")
     @Schema(description = "Nome da organização que o organizador representa", example = "Mega Eventos S.A.")
     private String organizationName;
 

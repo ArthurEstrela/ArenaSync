@@ -17,9 +17,13 @@ import com.ajs.arenasync.Entities.Enums.TournamentStatus;
 import com.ajs.arenasync.Services.TournamentService;
 
 import jakarta.validation.Valid;
-import io.swagger.v3.oas.annotations.Operation; // Importe esta anotação
-import io.swagger.v3.oas.annotations.tags.Tag; // Importe esta anotação
-import io.swagger.v3.oas.annotations.Parameter; // Importe esta anotação para documentar PathVariable
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
+
+import org.springframework.data.domain.Page; // Importe Page
+import org.springframework.data.domain.Pageable; // Importe Pageable
+import org.springframework.data.web.PageableDefault; // Importe PageableDefault
 
 @RestController
 @RequestMapping("/api/tournaments")
@@ -38,8 +42,9 @@ public class TournamentController {
         
         TournamentResponseDTO created = tournamentService.createTournament(organizerId, dto);
         created.add(linkTo(methodOn(TournamentController.class).getTournamentById(created.getId())).withSelfRel());
-        created.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments"));
-        addLinksBasedOnStatus(created); // Método auxiliar para adicionar links de HATEOAS
+        // Se você quiser que o link "all-tournaments" aponte para a versão paginada, você pode removê-lo ou ajustar.
+        // created.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments")); // Este link agora seria para a versão paginada
+        addLinksBasedOnStatus(created);
 
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -51,26 +56,33 @@ public class TournamentController {
             @Parameter(description = "ID do torneio a ser buscado", required = true) @PathVariable Long id) {
         TournamentResponseDTO tournament = tournamentService.findById(id);
         tournament.add(linkTo(methodOn(TournamentController.class).getTournamentById(id)).withSelfRel());
-        tournament.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments"));
+        // Ajuste aqui se o link para "all-tournaments" deve ser paginado
+        // tournament.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments"));
         addLinksBasedOnStatus(tournament);
 
         return ResponseEntity.ok(tournament);
     }
 
-    // READ - list all
+    // READ - list all (AGORA COM PAGINAÇÃO)
     @GetMapping
-    @Operation(summary = "Listar todos os torneios", description = "Retorna uma lista de todos os torneios registrados")
-    public ResponseEntity<CollectionModel<TournamentResponseDTO>> getAllTournaments() {
-        List<TournamentResponseDTO> tournamentsList = tournamentService.getAllTournaments();
+    @Operation(summary = "Listar todos os torneios com paginação", description = "Retorna uma lista paginada de todos os torneios registrados")
+    public ResponseEntity<Page<TournamentResponseDTO>> getAllTournaments(
+            @Parameter(description = "Detalhes da paginação (page=0, size=10, sort=id,asc)", required = false)
+            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) { // Default page=0, size=10, sort by ID
         
-        for (TournamentResponseDTO tournament : tournamentsList) {
+        Page<TournamentResponseDTO> page = tournamentService.getAllTournaments(pageable); // Chama o serviço com Pageable
+        
+        // Adicionar links HATEOAS para cada item na página
+        for (TournamentResponseDTO tournament : page.getContent()) {
             tournament.add(linkTo(methodOn(TournamentController.class).getTournamentById(tournament.getId())).withSelfRel());
             addLinksBasedOnStatus(tournament);
         }
-        Link selfLink = linkTo(methodOn(TournamentController.class).getAllTournaments()).withSelfRel();
-        CollectionModel<TournamentResponseDTO> collectionModel = CollectionModel.of(tournamentsList, selfLink);
         
-        return ResponseEntity.ok(collectionModel);
+        // Links da própria coleção paginada
+        // Você pode adicionar links para a próxima/anterior página, se quiser ser mais RESTful,
+        // mas o Page do Spring já contém essas informações.
+        
+        return ResponseEntity.ok(page); // Retorna a página diretamente
     }
 
     // UPDATE
@@ -82,6 +94,7 @@ public class TournamentController {
         
         TournamentResponseDTO updated = tournamentService.updateTournament(id, dto);
         updated.add(linkTo(methodOn(TournamentController.class).getTournamentById(id)).withSelfRel());
+        // updated.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments")); // Se necessário, ajustar para paginado
         addLinksBasedOnStatus(updated);
         return ResponseEntity.ok(updated);
     }

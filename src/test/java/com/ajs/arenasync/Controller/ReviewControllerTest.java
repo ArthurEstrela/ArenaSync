@@ -46,7 +46,7 @@ public class ReviewControllerTest {
     void setUp() {
         reviewRequestDTO = new ReviewRequestDTO();
         reviewRequestDTO.setUserId(userId);
-        reviewRequestDTO.setMatchId(matchId); // Obrigatório pela validação no service
+        reviewRequestDTO.setMatchId(matchId);
         reviewRequestDTO.setRating(5);
         reviewRequestDTO.setComment("Excellent!");
 
@@ -71,7 +71,7 @@ public class ReviewControllerTest {
 
     @Test
     void createReview_InvalidDTO_RatingNull() throws Exception {
-        reviewRequestDTO.setRating(null); // Viola @NotNull
+        reviewRequestDTO.setRating(null);
 
         mockMvc.perform(post("/api/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -92,22 +92,19 @@ public class ReviewControllerTest {
     
     @Test
     void createReview_ServiceThrowsBadRequest_MatchIdNull() throws Exception {
-        // Este teste simula o service lançando a exceção, que é o comportamento
-        // se a validação do service for atingida.
         when(reviewService.save(any(ReviewRequestDTO.class)))
             .thenThrow(new BadRequestException("É necessário informar o ID da partida para avaliar."));
         
-        // Para este DTO, passaremos o matchId nulo para o controller
         ReviewRequestDTO dtoWithNullMatchId = new ReviewRequestDTO();
         dtoWithNullMatchId.setUserId(userId);
-        dtoWithNullMatchId.setMatchId(null); // Match ID nulo
+        dtoWithNullMatchId.setMatchId(null);
         dtoWithNullMatchId.setRating(5);
 
 
         mockMvc.perform(post("/api/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dtoWithNullMatchId)))
-                .andExpect(status().isBadRequest()); // GlobalExceptionHandler mapeia BadRequestException para 400
+                .andExpect(status().isBadRequest());
     }
 
 
@@ -117,6 +114,7 @@ public class ReviewControllerTest {
 
         mockMvc.perform(get("/api/reviews/{id}", reviewId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(reviewId.intValue())))
                 .andExpect(jsonPath("$.comment", is(reviewResponseDTO.getComment())));
     }
@@ -135,8 +133,9 @@ public class ReviewControllerTest {
 
         mockMvc.perform(get("/api/reviews"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].comment", is(reviewResponseDTO.getComment())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.reviewResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.reviewResponseDTOList[0].comment", is(reviewResponseDTO.getComment())));
     }
 
     @Test
@@ -145,7 +144,9 @@ public class ReviewControllerTest {
 
         mockMvc.perform(get("/api/reviews"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
     @Test

@@ -4,7 +4,7 @@ import com.ajs.arenasync.DTO.TournamentRequestDTO;
 import com.ajs.arenasync.DTO.TournamentResponseDTO;
 import com.ajs.arenasync.Entities.Enums.TournamentStatus;
 import com.ajs.arenasync.Entities.Enums.TournamentType;
-import com.ajs.arenasync.Entities.Organizer; // Alterado de User para Organizer
+import com.ajs.arenasync.Entities.Organizer;
 import com.ajs.arenasync.Entities.Tournament;
 import com.ajs.arenasync.Exceptions.BusinessException;
 import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
@@ -16,6 +16,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.springframework.data.domain.Page; // Importe Page
+import org.springframework.data.domain.PageImpl; // Importe PageImpl para mockar
+import org.springframework.data.domain.PageRequest; // Importe PageRequest
+import org.springframework.data.domain.Pageable; // Importe Pageable
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -34,12 +39,12 @@ public class TournamentServiceTest {
     private TournamentRepository tournamentRepository;
 
     @Mock
-    private OrganizerRepository organizerRepository; // Mock para OrganizerRepository
+    private OrganizerRepository organizerRepository;
 
     @InjectMocks
     private TournamentService tournamentService;
 
-    private Organizer organizer; // Usar a entidade Organizer
+    private Organizer organizer;
     private Tournament tournament;
     private TournamentRequestDTO tournamentRequestDTO;
     private Long organizerId = 1L;
@@ -47,10 +52,9 @@ public class TournamentServiceTest {
 
     @BeforeEach
     void setUp() {
-        organizer = new Organizer(); // Instanciar Organizer
+        organizer = new Organizer();
         organizer.setId(organizerId);
         organizer.setName("Test Organizer");
-        // Defina outros campos do Organizer se necessário para os testes
 
         tournament = new Tournament();
         tournament.setId(tournamentId);
@@ -77,7 +81,7 @@ public class TournamentServiceTest {
         when(organizerRepository.findById(organizerId)).thenReturn(Optional.of(organizer));
         when(tournamentRepository.save(any(Tournament.class))).thenAnswer(invocation -> {
             Tournament saved = invocation.getArgument(0);
-            saved.setId(tournamentId); // Simula a atribuição de ID ao salvar
+            saved.setId(tournamentId);
             return saved;
         });
 
@@ -105,7 +109,7 @@ public class TournamentServiceTest {
 
     @Test
     void testCreateTournament_EndDateBeforeStartDate() {
-        tournamentRequestDTO.setEndDate(LocalDate.now().minusDays(1)); // Data de término inválida
+        tournamentRequestDTO.setEndDate(LocalDate.now().minusDays(1));
         tournamentRequestDTO.setStartDate(LocalDate.now());
 
         when(organizerRepository.findById(organizerId)).thenReturn(Optional.of(organizer));
@@ -142,7 +146,7 @@ public class TournamentServiceTest {
 
     @Test
     void testDeleteById_Success() {
-        tournament.setStatus(TournamentStatus.PENDING); // Pode ser PENDING ou ONGOING
+        tournament.setStatus(TournamentStatus.PENDING);
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
         doNothing().when(tournamentRepository).deleteById(tournamentId);
 
@@ -202,20 +206,20 @@ public class TournamentServiceTest {
 
     @Test
     void testStartTournament_NotPending() {
-        tournament.setStatus(TournamentStatus.ONGOING); // Já iniciado
+        tournament.setStatus(TournamentStatus.ONGOING);
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
 
         assertThrows(BusinessException.class, () -> {
             tournamentService.startTournament(tournamentId);
         });
 
-        tournament.setStatus(TournamentStatus.FINISHED); // Finalizado
+        tournament.setStatus(TournamentStatus.FINISHED);
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
         assertThrows(BusinessException.class, () -> {
             tournamentService.startTournament(tournamentId);
         });
 
-        verify(tournamentRepository, times(2)).findById(tournamentId); // Chamado duas vezes nos asserts
+        verify(tournamentRepository, times(2)).findById(tournamentId);
         verify(tournamentRepository, never()).save(any(Tournament.class));
     }
 
@@ -246,14 +250,14 @@ public class TournamentServiceTest {
 
     @Test
     void testFinishTournament_NotOngoing() {
-        tournament.setStatus(TournamentStatus.PENDING); // Pendente
+        tournament.setStatus(TournamentStatus.PENDING);
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
 
         assertThrows(BusinessException.class, () -> {
             tournamentService.finishTournament(tournamentId);
         });
 
-        tournament.setStatus(TournamentStatus.FINISHED); // Já finalizado
+        tournament.setStatus(TournamentStatus.FINISHED);
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
          assertThrows(BusinessException.class, () -> {
             tournamentService.finishTournament(tournamentId);
@@ -264,25 +268,30 @@ public class TournamentServiceTest {
     }
 
     @Test
-    void testGetAllTournaments() {
-        when(tournamentRepository.findAll()).thenReturn(Collections.singletonList(tournament));
+    void testGetAllTournaments_Paged() {
+        // Crie uma lista de torneios para a página
+        List<Tournament> tournaments = Collections.singletonList(tournament);
+        // Crie um objeto Page (PageImpl é a implementação concreta)
+        Pageable pageable = PageRequest.of(0, 10); // Página 0, tamanho 10
+        Page<Tournament> tournamentPage = new PageImpl<>(tournaments, pageable, 1);
 
-        List<TournamentResponseDTO> tournaments = tournamentService.getAllTournaments();
+        when(tournamentRepository.findAll(pageable)).thenReturn(tournamentPage);
 
-        assertNotNull(tournaments);
-        assertFalse(tournaments.isEmpty());
-        assertEquals(1, tournaments.size());
-        assertEquals(tournament.getName(), tournaments.get(0).getName());
-        verify(tournamentRepository, times(1)).findAll();
+        Page<TournamentResponseDTO> responsePage = tournamentService.getAllTournaments(pageable);
+
+        assertNotNull(responsePage);
+        assertFalse(responsePage.isEmpty());
+        assertEquals(1, responsePage.getTotalElements());
+        assertEquals(tournament.getName(), responsePage.getContent().get(0).getName());
+        verify(tournamentRepository, times(1)).findAll(pageable);
     }
 
     @Test
     void testUpdateTournament_Success() {
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
         when(tournamentRepository.save(any(Tournament.class))).thenAnswer(invocation -> {
-            // Simula a atualização e retorna o objeto atualizado
             Tournament updated = invocation.getArgument(0);
-            updated.setId(tournamentId); // Garante que o ID seja mantido
+            updated.setId(tournamentId);
             return updated;
         });
 
@@ -292,7 +301,6 @@ public class TournamentServiceTest {
         assertNotNull(responseDTO);
         assertEquals(tournamentRequestDTO.getName(), responseDTO.getName());
         assertEquals(tournamentRequestDTO.getModality(), responseDTO.getModality());
-        // O status não deve ser alterado pelo update, mantém o original
         assertEquals(tournament.getStatus(), responseDTO.getStatus());
         verify(tournamentRepository, times(1)).findById(tournamentId);
         verify(tournamentRepository, times(1)).save(any(Tournament.class));

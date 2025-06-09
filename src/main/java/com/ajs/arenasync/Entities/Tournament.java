@@ -27,14 +27,14 @@ public class Tournament implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "O nome é obrigatório") // Não pode ser nulo ou vazio
+    @NotNull(message = "O nome é obrigatório") // Não pode ser nulo ou vazio
     private String name;
 
-    @NotNull(message = "O tipo é obrigatório") // Altere de @NotBlank para @NotNull
+    @NotNull(message = "O tipo é obrigatório") 
     @Enumerated(EnumType.STRING) // ADICIONE ESTA LINHA!
     private TournamentType type;
     
-    @NotBlank(message = "A modalidade é obrigatório") // Não pode ser nulo ou vazio
+    @NotNull(message = "A modalidade é obrigatório") // Não pode ser nulo ou vazio
     private String modality;
     private String rules;
     private LocalDate startDate;
@@ -58,9 +58,9 @@ public class Tournament implements Serializable {
     public Tournament() {
     }
 
-    public Tournament(Long id, @NotBlank(message = "O nome é obrigatório") String name,
-            @NotBlank(message = "O tipo é obrigatório") TournamentType type,
-            @NotBlank(message = "A modalidade é obrigatório") String modality, String rules, LocalDate startDate,
+    public Tournament(Long id, @NotNull(message = "O nome é obrigatório") String name,
+            @NotNull(message = "O tipo é obrigatório") TournamentType type,
+            @NotNull(message = "A modalidade é obrigatório") String modality, String rules, LocalDate startDate,
             LocalDate endDate, TournamentStatus status, List<Enrollment> enrollments, List<Match> matches,
             List<Prize> prizes, List<Review> reviews, User organizer) {
         this.id = id;

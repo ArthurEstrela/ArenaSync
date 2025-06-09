@@ -68,7 +68,7 @@ public class PlayerControllerTest {
 
     @Test
     void createPlayer_InvalidDTO_NameBlank() throws Exception {
-        playerRequestDTO.setName(""); // Viola @NotBlank
+        playerRequestDTO.setName("");
 
         mockMvc.perform(post("/api/players")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,6 +93,7 @@ public class PlayerControllerTest {
 
         mockMvc.perform(get("/api/players/{id}", playerId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(playerId.intValue())))
                 .andExpect(jsonPath("$.name", is(playerResponseDTO.getName())));
     }
@@ -111,8 +112,9 @@ public class PlayerControllerTest {
 
         mockMvc.perform(get("/api/players"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is(playerResponseDTO.getName())));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].name", is(playerResponseDTO.getName())));
     }
     
     @Test
@@ -121,7 +123,9 @@ public class PlayerControllerTest {
 
         mockMvc.perform(get("/api/players"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(0)));
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
     }
 
 
@@ -131,15 +135,16 @@ public class PlayerControllerTest {
         freeAgentResponse.setId(2L);
         freeAgentResponse.setName("Free Agent");
         freeAgentResponse.setEmail("free@example.com");
-        freeAgentResponse.setTeamName(null); // Importante para free agent
+        freeAgentResponse.setTeamName(null);
 
         when(playerService.getFreeAgents()).thenReturn(Collections.singletonList(freeAgentResponse));
 
         mockMvc.perform(get("/api/players/free-agents"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name", is("Free Agent")))
-                .andExpect(jsonPath("$[0].teamName").doesNotExist()); // ou .is(nullValue()) dependendo da config do Jackson
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].name", is("Free Agent")))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].teamName").doesNotExist());
     }
 
     @Test

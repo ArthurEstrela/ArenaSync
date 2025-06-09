@@ -12,15 +12,15 @@ import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 @Schema(description = "Detalhes para a criação ou atualização de um torneio") // Anotação na classe do DTO
 public class TournamentRequestDTO {
 
-    @NotBlank(message = "O nome do torneio é obrigatório.")
+    @NotNull(message = "O nome do torneio é obrigatório.")
     @Schema(description = "Nome do torneio", example = "Campeonato de Verão 2025")
     private String name;
 
-    @NotBlank(message = "A modalidade é obrigatória.")
+    @NotNull(message = "A modalidade é obrigatória.")
     @Schema(description = "Modalidade do torneio (Ex: Futebol, Xadrez, LoL)", example = "Futebol")
     private String modality;
 
-    @NotBlank(message = "As regras do torneio são obrigatórias.")
+    @NotNull(message = "As regras do torneio são obrigatórias.")
     @Schema(description = "Regras específicas do torneio", example = "Regras FIFA, sistema de pontos, etc.")
     private String rules;
 

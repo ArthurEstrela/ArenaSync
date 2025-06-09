@@ -21,6 +21,9 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Collections;
+import static org.hamcrest.Matchers.hasSize;
+
 @WebMvcTest(StatisticController.class)
 public class StatisticControllerTest {
 
@@ -52,10 +55,6 @@ public class StatisticControllerTest {
         statisticResponseDTO.setGamesPlayed(10);
         statisticResponseDTO.setWins(5);
         statisticResponseDTO.setScore(100);
-        // statisticResponseDTO.setMatchInfo("Match Info Test"); // Ajuste se necessário
-        // statisticResponseDTO.setPoints(0); // Ajuste conforme os campos do seu DTO
-        // statisticResponseDTO.setAssists(0);
-        // statisticResponseDTO.setRebounds(0);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class StatisticControllerTest {
 
     @Test
     void createStatistic_InvalidDTO_PlayerIdNull() throws Exception {
-        statisticRequestDTO.setPlayerId(null); // Viola @NotNull
+        statisticRequestDTO.setPlayerId(null);
 
         mockMvc.perform(post("/api/statistics")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,6 +96,7 @@ public class StatisticControllerTest {
 
         mockMvc.perform(get("/api/statistics/{id}", statisticId))
                 .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(statisticId.intValue())))
                 .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())));
     }
@@ -146,4 +146,26 @@ public class StatisticControllerTest {
         mockMvc.perform(delete("/api/statistics/{id}", statisticId))
                 .andExpect(status().isNotFound());
     }
-}   
+
+    @Test
+    void getAllStatistics_Success() throws Exception {
+        when(statisticService.findAll()).thenReturn(Collections.singletonList(statisticResponseDTO));
+
+        mockMvc.perform(get("/api/statistics"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded.statisticResponseDTOList", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.statisticResponseDTOList[0].playerName", is(statisticResponseDTO.getPlayerName())));
+    }
+
+    @Test
+    void getAllStatistics_Empty() throws Exception {
+        when(statisticService.findAll()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/statistics"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
+                .andExpect(jsonPath("$._embedded").doesNotExist())
+                .andExpect(jsonPath("$._links").exists());
+    }
+}

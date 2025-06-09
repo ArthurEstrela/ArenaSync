@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.persistence.Inheritance; // Importe esta anotação
 import jakarta.persistence.InheritanceType; // Importe esta anotação
@@ -24,9 +25,9 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "O nome é obrigatório")
+    @NotNull(message = "O nome é obrigatório")
     private String name;
-    @NotBlank(message = "A idade é obrigatório")
+    @NotNull(message = "A idade é obrigatório")
     private Integer age;
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
     private String password;
@@ -43,8 +44,8 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(Long id, @NotBlank(message = "O nome é obrigatório") String name,
-            @NotBlank(message = "A idade é obrigatório") Integer age,
+    public User(Long id, @NotNull(message = "O nome é obrigatório") String name,
+            @NotNull(message = "A idade é obrigatório") Integer age,
             @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres") String password,
             @Email(message = "Email inválido") String email, List<Tournament> tournaments, List<Review> reviews) {
         this.id = id;

@@ -36,7 +36,7 @@ public class LocationPlatformController {
         locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).findById(id)).withSelfRel());
         locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));
         locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).update(id, null)).withRel("update"));
-        locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).deleteById(id)).withRel("delete")); // Corrigido para delete(id)
+        locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).deleteById(id)).withRel("delete"));
         return ResponseEntity.ok(locationPlatform);
     }
 
@@ -47,7 +47,7 @@ public class LocationPlatformController {
         for (LocationPlatformResponseDTO locationPlatform : locationsPlatformsList) {
             locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).findById(locationPlatform.getId())).withSelfRel());
             locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).update(locationPlatform.getId(), null)).withRel("update"));
-            locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).deleteById(locationPlatform.getId())).withRel("delete")); // Corrigido para delete(id)
+            locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).deleteById(locationPlatform.getId())).withRel("delete"));
         }
         Link selfLink = linkTo(methodOn(LocationPlatformController.class).findAll()).withSelfRel();
         return ResponseEntity.ok(CollectionModel.of(locationsPlatformsList, selfLink));
@@ -57,11 +57,14 @@ public class LocationPlatformController {
     @Operation(summary = "Criar novo local/plataforma", description = "Cria um novo local ou plataforma no sistema")
     public ResponseEntity<LocationPlatformResponseDTO> create(
             @Valid @RequestBody LocationPlatformRequestDTO dto) {
-        LocationPlatformResponseDTO created = locationPlatformService.create(dto); // Corrigido para create(dto)
-        created.add(linkTo(methodOn(LocationPlatformController.class).findById(created.getId())).withSelfRel());
-        created.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));
-        created.add(linkTo(methodOn(LocationPlatformController.class).update(created.getId(), null)).withRel("update"));
-        created.add(linkTo(methodOn(LocationPlatformController.class).deleteById(created.getId())).withRel("delete")); // Corrigido para delete(id)
+        LocationPlatformResponseDTO created = locationPlatformService.create(dto);
+        // CORREÇÃO AQUI: Adiciona verificação de nulidade antes de adicionar links HATEOAS
+        if (created != null) {
+            created.add(linkTo(methodOn(LocationPlatformController.class).findById(created.getId())).withSelfRel());
+            created.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));
+            created.add(linkTo(methodOn(LocationPlatformController.class).update(created.getId(), null)).withRel("update"));
+            created.add(linkTo(methodOn(LocationPlatformController.class).deleteById(created.getId())).withRel("delete"));
+        }
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
@@ -73,7 +76,7 @@ public class LocationPlatformController {
         LocationPlatformResponseDTO updated = locationPlatformService.update(id, dto);
         updated.add(linkTo(methodOn(LocationPlatformController.class).findById(id)).withSelfRel());
         updated.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));
-        updated.add(linkTo(methodOn(LocationPlatformController.class).deleteById(id)).withRel("delete")); // Corrigido para delete(id)
+        updated.add(linkTo(methodOn(LocationPlatformController.class).deleteById(id)).withRel("delete"));
         return ResponseEntity.ok(updated);
     }
 
@@ -81,7 +84,7 @@ public class LocationPlatformController {
     @Operation(summary = "Deletar local/plataforma", description = "Deleta um local ou plataforma do sistema pelo seu ID")
     public ResponseEntity<Void> deleteById(
             @Parameter(description = "ID do local/plataforma a ser deletado", required = true) @PathVariable Long id) {
-        locationPlatformService.delete(id); // Corrigido para delete(id)
+        locationPlatformService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

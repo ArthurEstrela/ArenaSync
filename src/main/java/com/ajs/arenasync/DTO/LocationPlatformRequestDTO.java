@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Detalhes para a criação ou atualização de um local/plataforma")
 public class LocationPlatformRequestDTO {
 
-    @NotBlank(message = "O nome é obrigatório.")
+    @NotNull(message = "O nome é obrigatório.")
     @Schema(description = "Nome do local ou plataforma", example = "Arena Gaming X")
     private String name;
 

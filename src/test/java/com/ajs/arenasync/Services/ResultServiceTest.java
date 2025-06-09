@@ -46,7 +46,6 @@ public class ResultServiceTest {
     void setUp() {
         match = new Match();
         match.setId(matchId);
-        // Configure outros campos do Match se necessário para o DTO de resposta
 
         result = new Result();
         result.setId(resultId);
@@ -62,11 +61,11 @@ public class ResultServiceTest {
 
     @Test
     void testSave_Success() {
-        when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
         when(resultRepository.existsByMatchId(matchId)).thenReturn(false);
+        when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
         when(resultRepository.save(any(Result.class))).thenAnswer(invocation -> {
             Result saved = invocation.getArgument(0);
-            saved.setId(resultId); // Simula atribuição de ID
+            saved.setId(resultId);
             return saved;
         });
 
@@ -75,34 +74,33 @@ public class ResultServiceTest {
         assertNotNull(responseDTO);
         assertEquals(resultRequestDTO.getMatchId(), responseDTO.getMatchId());
         assertEquals(resultRequestDTO.getScoreTeamA(), responseDTO.getScoreTeamA());
-        verify(matchRepository, times(1)).findById(matchId);
         verify(resultRepository, times(1)).existsByMatchId(matchId);
+        verify(matchRepository, times(1)).findById(matchId);
         verify(resultRepository, times(1)).save(any(Result.class));
     }
 
     @Test
     void testSave_MatchNotFound() {
+        when(resultRepository.existsByMatchId(matchId)).thenReturn(false);
         when(matchRepository.findById(matchId)).thenReturn(Optional.empty());
-        // A validação de matchId no DTO é feita antes, mas a busca no repo também é validada
-        // Se o DTO estiver ok, mas o match não existir no banco:
 
         assertThrows(ResourceNotFoundException.class, () -> {
             resultService.save(resultRequestDTO);
         });
 
+        verify(resultRepository, times(1)).existsByMatchId(matchId);
         verify(matchRepository, times(1)).findById(matchId);
-        verify(resultRepository, never()).existsByMatchId(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
 
     @Test
     void testSave_MatchIdNullInDTO() {
         resultRequestDTO.setMatchId(null);
-        // A validação no service deve lançar BadRequestException
         assertThrows(BadRequestException.class, () -> {
             resultService.save(resultRequestDTO);
         });
         verify(matchRepository, never()).findById(anyLong());
+        verify(resultRepository, never()).existsByMatchId(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
 
@@ -112,6 +110,8 @@ public class ResultServiceTest {
          assertThrows(BadRequestException.class, () -> {
             resultService.save(resultRequestDTO);
         });
+        verify(matchRepository, never()).findById(anyLong());
+        verify(resultRepository, never()).existsByMatchId(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
     
@@ -121,6 +121,8 @@ public class ResultServiceTest {
          assertThrows(BadRequestException.class, () -> {
             resultService.save(resultRequestDTO);
         });
+        verify(matchRepository, never()).findById(anyLong());
+        verify(resultRepository, never()).existsByMatchId(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
 
@@ -130,6 +132,8 @@ public class ResultServiceTest {
          assertThrows(BadRequestException.class, () -> {
             resultService.save(resultRequestDTO);
         });
+        verify(matchRepository, never()).findById(anyLong());
+        verify(resultRepository, never()).existsByMatchId(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
 
@@ -139,20 +143,21 @@ public class ResultServiceTest {
          assertThrows(BadRequestException.class, () -> {
             resultService.save(resultRequestDTO);
         });
+        verify(matchRepository, never()).findById(anyLong());
+        verify(resultRepository, never()).existsByMatchId(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
 
     @Test
     void testSave_ResultAlreadyExistsForMatch() {
-        when(matchRepository.findById(matchId)).thenReturn(Optional.of(match)); // Match precisa ser encontrado primeiro
         when(resultRepository.existsByMatchId(matchId)).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> {
             resultService.save(resultRequestDTO);
         });
 
-        verify(matchRepository, times(1)).findById(matchId);
         verify(resultRepository, times(1)).existsByMatchId(matchId);
+        verify(matchRepository, never()).findById(anyLong());
         verify(resultRepository, never()).save(any(Result.class));
     }
 
