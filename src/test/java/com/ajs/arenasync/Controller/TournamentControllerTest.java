@@ -115,7 +115,7 @@ public class TournamentControllerTest {
         mockMvc.perform(post("/api/tournaments/organizer/{organizerId}", organizerId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(tournamentRequestDTO)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
 
@@ -214,7 +214,7 @@ public class TournamentControllerTest {
         doThrow(new BusinessException("Não é possível excluir um torneio já finalizado.")).when(tournamentService).deleteById(tournamentId);
 
         mockMvc.perform(delete("/api/tournaments/{id}", tournamentId))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -242,7 +242,7 @@ public class TournamentControllerTest {
             .thenThrow(new BusinessException("Apenas torneios pendentes podem ser iniciados."));
 
         mockMvc.perform(post("/api/tournaments/{id}/start", tournamentId))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
 

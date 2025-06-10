@@ -89,7 +89,7 @@ public class OrganizerControllerTest {
         mockMvc.perform(post("/api/organizers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(organizerRequestDTO)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -179,6 +179,6 @@ public class OrganizerControllerTest {
             .when(organizerService).deleteOrganizer(organizerId);
         
         mockMvc.perform(delete("/api/organizers/{id}", organizerId))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 }

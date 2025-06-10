@@ -47,7 +47,7 @@ public class TeamController {
             @Parameter(description = "ID do time a ser buscado", required = true) @PathVariable Long id) {
         TeamResponseDTO team = teamService.findById(id);
         team.add(linkTo(methodOn(TeamController.class).getTeamById(id)).withSelfRel());
-        team.add(linkTo(methodOn(TeamController.class).updateTeam(id, null)).withRel("edit"));
+        team.add(linkTo(methodOn(TeamController.class).updateTeam(id, new TeamRequestDTO())).withRel("edit"));
         team.add(linkTo(methodOn(TeamController.class).deleteTeam(id)).withRel("delete"));
         team.add(linkTo(methodOn(TeamController.class).getAllTeams()).withRel("all-teams"));
         return ResponseEntity.ok(team);
@@ -92,7 +92,7 @@ public class TeamController {
 
         for (TeamResponseDTO team : teamsList) {
             team.add(linkTo(methodOn(TeamController.class).getTeamById(team.getId())).withSelfRel());
-            team.add(linkTo(methodOn(TeamController.class).updateTeam(team.getId(), null)).withRel("edit"));
+            team.add(linkTo(methodOn(TeamController.class).updateTeam(team.getId(), new TeamRequestDTO())).withRel("edit"));
             team.add(linkTo(methodOn(TeamController.class).deleteTeam(team.getId())).withRel("delete"));
         }
         Link selfLink = linkTo(methodOn(TeamController.class).getAllTeams()).withSelfRel();

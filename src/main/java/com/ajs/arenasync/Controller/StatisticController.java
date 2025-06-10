@@ -56,7 +56,7 @@ public class StatisticController {
             @Parameter(description = "ID da estatística a ser buscada", required = true) @PathVariable Long id) {
         StatisticResponseDTO statistic = statisticService.findById(id);
         statistic.add(linkTo(methodOn(StatisticController.class).getStatisticById(id)).withSelfRel());
-        statistic.add(linkTo(methodOn(StatisticController.class).updateStatistic(id, null)).withRel("edit"));
+        statistic.add(linkTo(methodOn(StatisticController.class).updateStatistic(id, new StatisticRequestDTO())).withRel("edit"));
         statistic.add(linkTo(methodOn(StatisticController.class).deleteStatistic(id)).withRel("delete"));
 
         statistic.add(linkTo(methodOn(StatisticController.class).getAllStatistics()).withRel("all-statistics"));
@@ -73,7 +73,7 @@ public class StatisticController {
             // CORREÇÃO AQUI: Adiciona verificação de nulidade antes de adicionar links HATEOAS (para cada item na lista)
             if (statistic != null) {
                 statistic.add(linkTo(methodOn(StatisticController.class).getStatisticById(statistic.getId())).withSelfRel());
-                statistic.add(linkTo(methodOn(StatisticController.class).updateStatistic(statistic.getId(), null)).withRel("edit"));
+                statistic.add(linkTo(methodOn(StatisticController.class).updateStatistic(statistic.getId(), new StatisticRequestDTO())).withRel("edit"));
                 statistic.add(linkTo(methodOn(StatisticController.class).deleteStatistic(statistic.getId())).withRel("delete"));
             }
         }

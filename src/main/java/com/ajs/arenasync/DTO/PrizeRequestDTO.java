@@ -1,5 +1,6 @@
 package com.ajs.arenasync.DTO;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
@@ -7,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 @Schema(description = "Detalhes para a criação de um prêmio") // Anotação na classe do DTO
 public class PrizeRequestDTO {
 
-    @NotNull(message = "A descrição do prêmio é obrigatória.")
+    @NotBlank(message = "A descrição do prêmio é obrigatória.")
     @Schema(description = "Descrição do prêmio (ex: Troféu de Ouro, Medalha)", example = "Troféu de Ouro")
     private String description;
 

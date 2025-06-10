@@ -1,7 +1,5 @@
 package com.ajs.arenasync.Controller;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -26,7 +24,8 @@ import org.springframework.data.web.PageableDefault; // Importe PageableDefault
 
 @RestController
 @RequestMapping("/api/tournaments")
-@Tag(name = "Tournament Management", description = "Operações para gerenciar torneios no ArenaSync") // Anotação na classe
+@Tag(name = "Tournament Management", description = "Operações para gerenciar torneios no ArenaSync") // Anotação na
+                                                                                                     // classe
 public class TournamentController {
 
     @Autowired
@@ -38,11 +37,13 @@ public class TournamentController {
     public ResponseEntity<TournamentResponseDTO> createTournament(
             @Parameter(description = "ID do organizador do torneio", required = true) @PathVariable Long organizerId,
             @Valid @RequestBody TournamentRequestDTO dto) {
-        
+
         TournamentResponseDTO created = tournamentService.createTournament(organizerId, dto);
         created.add(linkTo(methodOn(TournamentController.class).getTournamentById(created.getId())).withSelfRel());
-        // Se você quiser que o link "all-tournaments" aponte para a versão paginada, você pode removê-lo ou ajustar.
-        // created.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments")); // Este link agora seria para a versão paginada
+        // Se você quiser que o link "all-tournaments" aponte para a versão paginada,
+        // você pode removê-lo ou ajustar.
+        // created.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments"));
+        // // Este link agora seria para a versão paginada
         addLinksBasedOnStatus(created);
 
         return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -66,21 +67,28 @@ public class TournamentController {
     @GetMapping
     @Operation(summary = "Listar todos os torneios com paginação", description = "Retorna uma lista paginada de todos os torneios registrados")
     public ResponseEntity<Page<TournamentResponseDTO>> getAllTournaments(
-            @Parameter(description = "Detalhes da paginação (page=0, size=10, sort=id,asc)", required = false)
-            @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) { // Default page=0, size=10, sort by ID
-        
-        Page<TournamentResponseDTO> page = tournamentService.getAllTournaments(pageable); // Chama o serviço com Pageable
-        
+            @Parameter(description = "Detalhes da paginação (page=0, size=10, sort=id,asc)", required = false) @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) { // Default
+                                                                                                                                                                                       // page=0,
+                                                                                                                                                                                       // size=10,
+                                                                                                                                                                                       // sort
+                                                                                                                                                                                       // by
+                                                                                                                                                                                       // ID
+
+        Page<TournamentResponseDTO> page = tournamentService.getAllTournaments(pageable); // Chama o serviço com
+                                                                                          // Pageable
+
         // Adicionar links HATEOAS para cada item na página
         for (TournamentResponseDTO tournament : page.getContent()) {
-            tournament.add(linkTo(methodOn(TournamentController.class).getTournamentById(tournament.getId())).withSelfRel());
+            tournament.add(
+                    linkTo(methodOn(TournamentController.class).getTournamentById(tournament.getId())).withSelfRel());
             addLinksBasedOnStatus(tournament);
         }
-        
+
         // Links da própria coleção paginada
-        // Você pode adicionar links para a próxima/anterior página, se quiser ser mais RESTful,
+        // Você pode adicionar links para a próxima/anterior página, se quiser ser mais
+        // RESTful,
         // mas o Page do Spring já contém essas informações.
-        
+
         return ResponseEntity.ok(page); // Retorna a página diretamente
     }
 
@@ -90,10 +98,9 @@ public class TournamentController {
     public ResponseEntity<TournamentResponseDTO> updateTournament(
             @Parameter(description = "ID do torneio a ser atualizado", required = true) @PathVariable Long id,
             @Valid @RequestBody TournamentRequestDTO dto) {
-        
+
         TournamentResponseDTO updated = tournamentService.updateTournament(id, dto);
         updated.add(linkTo(methodOn(TournamentController.class).getTournamentById(id)).withSelfRel());
-        // updated.add(linkTo(methodOn(TournamentController.class).getAllTournaments()).withRel("all-tournaments")); // Se necessário, ajustar para paginado
         addLinksBasedOnStatus(updated);
         return ResponseEntity.ok(updated);
     }
@@ -137,11 +144,12 @@ public class TournamentController {
         Long id = tournament.getId();
 
         if (tournament.getStatus() != TournamentStatus.FINISHED) {
-             tournament.add(linkTo(methodOn(TournamentController.class).updateTournament(id, null)).withRel("edit"));
+            tournament.add(linkTo(methodOn(TournamentController.class).updateTournament(id, new TournamentRequestDTO()))
+                    .withRel("edit"));
         }
 
         if (tournament.getStatus() != TournamentStatus.FINISHED) {
-             tournament.add(linkTo(methodOn(TournamentController.class).deleteTournament(id)).withRel("delete"));
+            tournament.add(linkTo(methodOn(TournamentController.class).deleteTournament(id)).withRel("delete"));
         }
 
         if (tournament.getStatus() == TournamentStatus.PENDING) {

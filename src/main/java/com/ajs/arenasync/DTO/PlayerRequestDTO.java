@@ -1,13 +1,14 @@
 package com.ajs.arenasync.DTO;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
 
 @Schema(description = "Detalhes para a criação de um jogador") // Anotação na classe do DTO
 public class PlayerRequestDTO {
 
-    @NotNull(message = "O nome do jogador é obrigatório.")
+    @NotBlank(message = "O nome do jogador é obrigatório.")
     @Schema(description = "Nome completo do jogador", example = "Lionel Messi")
     private String name;
 

@@ -83,7 +83,7 @@ public class LocationPlatformControllerTest {
         mockMvc.perform(post("/api/location-platforms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

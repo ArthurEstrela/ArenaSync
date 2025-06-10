@@ -35,7 +35,7 @@ public class LocationPlatformController {
         LocationPlatformResponseDTO locationPlatform = locationPlatformService.findById(id);
         locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).findById(id)).withSelfRel());
         locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));
-        locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).update(id, null)).withRel("update"));
+        locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).update(id, new LocationPlatformRequestDTO())).withRel("update"));
         locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).deleteById(id)).withRel("delete"));
         return ResponseEntity.ok(locationPlatform);
     }
@@ -46,7 +46,7 @@ public class LocationPlatformController {
         List<LocationPlatformResponseDTO> locationsPlatformsList = locationPlatformService.findAll();
         for (LocationPlatformResponseDTO locationPlatform : locationsPlatformsList) {
             locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).findById(locationPlatform.getId())).withSelfRel());
-            locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).update(locationPlatform.getId(), null)).withRel("update"));
+            locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).update(locationPlatform.getId(), new LocationPlatformRequestDTO())).withRel("update"));
             locationPlatform.add(linkTo(methodOn(LocationPlatformController.class).deleteById(locationPlatform.getId())).withRel("delete"));
         }
         Link selfLink = linkTo(methodOn(LocationPlatformController.class).findAll()).withSelfRel();
@@ -61,7 +61,7 @@ public class LocationPlatformController {
         if (created != null) {
             created.add(linkTo(methodOn(LocationPlatformController.class).findById(created.getId())).withSelfRel());
             created.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));
-            created.add(linkTo(methodOn(LocationPlatformController.class).update(created.getId(), null)).withRel("update"));
+            created.add(linkTo(methodOn(LocationPlatformController.class).update(created.getId(), new LocationPlatformRequestDTO())).withRel("update"));
             created.add(linkTo(methodOn(LocationPlatformController.class).deleteById(created.getId())).withRel("delete"));
         }
         return new ResponseEntity<>(created, HttpStatus.CREATED);

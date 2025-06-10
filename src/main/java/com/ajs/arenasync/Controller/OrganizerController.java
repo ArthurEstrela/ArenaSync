@@ -35,7 +35,7 @@ public class OrganizerController {
         OrganizerResponseDTO organizer = organizerService.getOrganizerById(id);
         organizer.add(linkTo(methodOn(OrganizerController.class).getOrganizerById(id)).withSelfRel());
         organizer.add(linkTo(methodOn(OrganizerController.class).getAllOrganizers()).withRel("all-organizers"));
-        organizer.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(id, null)).withRel("update"));
+        organizer.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(id,  new OrganizerRequestDTO())).withRel("update"));
         organizer.add(linkTo(methodOn(OrganizerController.class).deleteOrganizer(id)).withRel("delete"));
         return ResponseEntity.ok(organizer);
     }
@@ -47,7 +47,7 @@ public class OrganizerController {
         List<OrganizerResponseDTO> organizersList = organizerService.getAllOrganizers();
         for (OrganizerResponseDTO organizer : organizersList) {
             organizer.add(linkTo(methodOn(OrganizerController.class).getOrganizerById(organizer.getId())).withSelfRel());
-            organizer.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(organizer.getId(), null)).withRel("update"));
+            organizer.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(organizer.getId(),  new OrganizerRequestDTO())).withRel("update"));
             organizer.add(linkTo(methodOn(OrganizerController.class).deleteOrganizer(organizer.getId())).withRel("delete"));
         }
         Link selfLink = linkTo(methodOn(OrganizerController.class).getAllOrganizers()).withSelfRel();
@@ -61,7 +61,7 @@ public class OrganizerController {
         OrganizerResponseDTO created = organizerService.createOrganizer(dto);
         created.add(linkTo(methodOn(OrganizerController.class).getOrganizerById(created.getId())).withSelfRel());
         created.add(linkTo(methodOn(OrganizerController.class).getAllOrganizers()).withRel("all-organizers"));
-        created.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(created.getId(), null)).withRel("update"));
+        created.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(created.getId(),  new OrganizerRequestDTO())).withRel("update"));
         created.add(linkTo(methodOn(OrganizerController.class).deleteOrganizer(created.getId())).withRel("delete"));
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
