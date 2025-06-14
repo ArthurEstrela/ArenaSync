@@ -38,7 +38,7 @@ public class TournamentController {
             @Parameter(description = "ID do organizador do torneio", required = true) @PathVariable Long organizerId,
             @Valid @RequestBody TournamentRequestDTO dto) {
 
-        TournamentResponseDTO created = tournamentService.createTournament(organizerId, dto);
+        TournamentResponseDTO created = tournamentService.saveTournament(organizerId, dto);
         created.add(linkTo(methodOn(TournamentController.class).getTournamentById(created.getId())).withSelfRel());
         // Se você quiser que o link "all-tournaments" aponte para a versão paginada,
         // você pode removê-lo ou ajustar.

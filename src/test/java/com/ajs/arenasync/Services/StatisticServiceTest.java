@@ -51,6 +51,7 @@ public class StatisticServiceTest {
         statistic.setGamesPlayed(10);
         statistic.setWins(5);
         statistic.setScore(100);
+        statistic.setAssists(10); // Adicionado para teste
         statistic.setPlayer(player);
 
         statisticRequestDTO = new StatisticRequestDTO();
@@ -58,6 +59,7 @@ public class StatisticServiceTest {
         statisticRequestDTO.setGamesPlayed(10);
         statisticRequestDTO.setWins(5);
         statisticRequestDTO.setScore(100);
+        statisticRequestDTO.setAssists(10); // Adicionado para teste
     }
 
     @Test
@@ -73,6 +75,7 @@ public class StatisticServiceTest {
 
         assertNotNull(responseDTO);
         assertEquals(statisticRequestDTO.getGamesPlayed(), responseDTO.getGamesPlayed());
+        assertEquals(statisticRequestDTO.getAssists(), responseDTO.getAssists()); // Verifica assists
         assertEquals(player.getName(), responseDTO.getPlayerName());
         verify(playerRepository, times(1)).findById(playerId);
         verify(statisticRepository, times(1)).save(any(Statistic.class));
@@ -112,6 +115,13 @@ public class StatisticServiceTest {
         assertThrows(BadRequestException.class, () -> {
             statisticService.save(statisticRequestDTO);
         });
+
+        statisticRequestDTO.setWins(5);
+        statisticRequestDTO.setAssists(-1); // Testa assists negativos
+        assertThrows(BadRequestException.class, () -> {
+            statisticService.save(statisticRequestDTO);
+        });
+
         verify(playerRepository, never()).findById(anyLong());
         verify(statisticRepository, never()).save(any(Statistic.class));
     }
@@ -136,6 +146,7 @@ public class StatisticServiceTest {
 
         assertNotNull(responseDTO);
         assertEquals(statistic.getGamesPlayed(), responseDTO.getGamesPlayed());
+        assertEquals(statistic.getAssists(), responseDTO.getAssists()); // Verifica assists
         assertEquals(player.getName(), responseDTO.getPlayerName());
         verify(statisticRepository, times(1)).findById(statisticId);
     }
@@ -157,6 +168,7 @@ public class StatisticServiceTest {
         updateDto.setGamesPlayed(12);
         updateDto.setWins(6);
         updateDto.setScore(120);
+        updateDto.setAssists(12); // Adicionado para teste
 
         Statistic updatedStatistic = new Statistic();
         updatedStatistic.setId(statisticId);
@@ -164,6 +176,7 @@ public class StatisticServiceTest {
         updatedStatistic.setGamesPlayed(updateDto.getGamesPlayed());
         updatedStatistic.setWins(updateDto.getWins());
         updatedStatistic.setScore(updateDto.getScore());
+        updatedStatistic.setAssists(updateDto.getAssists()); // Adicionado para teste
 
         when(statisticRepository.findById(statisticId)).thenReturn(Optional.of(statistic));
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
@@ -174,6 +187,7 @@ public class StatisticServiceTest {
         assertNotNull(responseDTO);
         assertEquals(updateDto.getGamesPlayed(), responseDTO.getGamesPlayed());
         assertEquals(updateDto.getWins(), responseDTO.getWins());
+        assertEquals(updateDto.getAssists(), responseDTO.getAssists()); // Verifica assists
         verify(statisticRepository, times(1)).findById(statisticId);
         verify(playerRepository, times(1)).findById(playerId);
         verify(statisticRepository, times(1)).save(any(Statistic.class));
@@ -185,7 +199,8 @@ public class StatisticServiceTest {
         updateDto.setPlayerId(playerId);
         updateDto.setGamesPlayed(10);
         updateDto.setWins(5);
-        updateDto.setScore(100); // Garante que todos os campos NotNull estão preenchidos para evitar NPE
+        updateDto.setScore(100);
+        updateDto.setAssists(10); // Garante que todos os campos NotNull estão preenchidos para evitar NPE
 
         when(statisticRepository.findById(statisticId)).thenReturn(Optional.empty());
 
@@ -204,7 +219,8 @@ public class StatisticServiceTest {
         updateDto.setPlayerId(newPlayerId);
         updateDto.setGamesPlayed(10);
         updateDto.setWins(5);
-        updateDto.setScore(100); // Garante que todos os campos NotNull estão preenchidos para evitar NPE
+        updateDto.setScore(100);
+        updateDto.setAssists(10); // Garante que todos os campos NotNull estão preenchidos para evitar NPE
 
         when(statisticRepository.findById(statisticId)).thenReturn(Optional.of(statistic));
         when(playerRepository.findById(newPlayerId)).thenReturn(Optional.empty());

@@ -22,7 +22,7 @@ public class LocationPlatformService {
     private LocationPlatformRepository locationPlatformRepository;
 
     @CacheEvict(allEntries = true)
-    public LocationPlatformResponseDTO create(LocationPlatformRequestDTO dto) {
+    public LocationPlatformResponseDTO save(LocationPlatformRequestDTO dto) {
         if (locationPlatformRepository.findAll().stream()
                 .anyMatch(lp -> lp.getName().equalsIgnoreCase(dto.getName()))) {
             throw new BusinessException("Já existe um local/plataforma com esse nome.");

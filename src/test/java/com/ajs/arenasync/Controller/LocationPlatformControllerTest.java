@@ -55,7 +55,7 @@ public class LocationPlatformControllerTest {
 
     @Test
     void createLocationPlatform_Success() throws Exception {
-        when(locationPlatformService.create(any(LocationPlatformRequestDTO.class))).thenReturn(responseDTO);
+        when(locationPlatformService.save(any(LocationPlatformRequestDTO.class))).thenReturn(responseDTO);
 
         mockMvc.perform(post("/api/location-platforms")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ public class LocationPlatformControllerTest {
 
     @Test
     void createLocationPlatform_ServiceThrowsBusinessException_NameExists() throws Exception {
-        when(locationPlatformService.create(any(LocationPlatformRequestDTO.class)))
+        when(locationPlatformService.save(any(LocationPlatformRequestDTO.class)))
             .thenThrow(new BusinessException("Já existe um local/plataforma com esse nome."));
 
         mockMvc.perform(post("/api/location-platforms")

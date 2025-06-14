@@ -46,12 +46,14 @@ public class PlayerControllerTest {
         playerRequestDTO = new PlayerRequestDTO();
         playerRequestDTO.setName("Test Player");
         playerRequestDTO.setEmail("player@example.com");
+        playerRequestDTO.setPosition("Mid Laner"); // Adicionado para teste
         playerRequestDTO.setTeamId(teamId);
 
         playerResponseDTO = new PlayerResponseDTO();
         playerResponseDTO.setId(playerId);
         playerResponseDTO.setName("Test Player");
         playerResponseDTO.setEmail("player@example.com");
+        playerResponseDTO.setPosition("Mid Laner"); // Adicionado para teste
         playerResponseDTO.setTeamName("Test Team");
     }
 
@@ -63,7 +65,8 @@ public class PlayerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(playerRequestDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name", is(playerResponseDTO.getName())));
+                .andExpect(jsonPath("$.name", is(playerResponseDTO.getName())))
+                .andExpect(jsonPath("$.position", is(playerResponseDTO.getPosition()))); // Verifica a posição
     }
 
     @Test
@@ -95,7 +98,8 @@ public class PlayerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(playerId.intValue())))
-                .andExpect(jsonPath("$.name", is(playerResponseDTO.getName())));
+                .andExpect(jsonPath("$.name", is(playerResponseDTO.getName())))
+                .andExpect(jsonPath("$.position", is(playerResponseDTO.getPosition()))); // Verifica a posição
     }
 
     @Test
@@ -114,7 +118,8 @@ public class PlayerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList", hasSize(1)))
-                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].name", is(playerResponseDTO.getName())));
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].name", is(playerResponseDTO.getName())))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].position", is(playerResponseDTO.getPosition()))); // Verifica a posição
     }
     
     @Test
@@ -135,6 +140,7 @@ public class PlayerControllerTest {
         freeAgentResponse.setId(2L);
         freeAgentResponse.setName("Free Agent");
         freeAgentResponse.setEmail("free@example.com");
+        freeAgentResponse.setPosition(null); // Agente livre pode não ter posição definida
         freeAgentResponse.setTeamName(null);
 
         when(playerService.getFreeAgents()).thenReturn(Collections.singletonList(freeAgentResponse));
@@ -144,6 +150,7 @@ public class PlayerControllerTest {
                 .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList", hasSize(1)))
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].name", is("Free Agent")))
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].position").isEmpty()) // Verifica que está vazio
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].teamName").doesNotExist());
     }
 

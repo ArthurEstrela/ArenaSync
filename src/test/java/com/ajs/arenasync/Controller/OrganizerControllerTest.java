@@ -62,7 +62,7 @@ public class OrganizerControllerTest {
 
     @Test
     void createOrganizer_Success() throws Exception {
-        when(organizerService.createOrganizer(any(OrganizerRequestDTO.class))).thenReturn(organizerResponseDTO);
+        when(organizerService.saveOrganizer(any(OrganizerRequestDTO.class))).thenReturn(organizerResponseDTO);
 
         mockMvc.perform(post("/api/organizers")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -83,7 +83,7 @@ public class OrganizerControllerTest {
 
     @Test
     void createOrganizer_ServiceThrowsBusinessException_EmailExists() throws Exception {
-        when(organizerService.createOrganizer(any(OrganizerRequestDTO.class)))
+        when(organizerService.saveOrganizer(any(OrganizerRequestDTO.class)))
             .thenThrow(new BusinessException("Já existe um organizador com este e-mail."));
 
         mockMvc.perform(post("/api/organizers")

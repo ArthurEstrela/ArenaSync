@@ -9,6 +9,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*; // Imp
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import com.ajs.arenasync.DTO.MatchRequestDTO;
 import com.ajs.arenasync.DTO.MatchResponseDTO;
@@ -34,17 +35,22 @@ public class MatchController {
         created.add(linkTo(methodOn(MatchController.class).findById(created.getId())).withSelfRel());
         created.add(linkTo(methodOn(MatchController.class).findAll()).withRel("all-matches"));
         
-        // Links para recursos relacionados (Teams, Tournament, LocationPlatform)
-        try {
-            created.add(linkTo(methodOn(TeamController.class).getTeamById(dto.getTeamAId())).withRel("team-a"));
-            created.add(linkTo(methodOn(TeamController.class).getTeamById(dto.getTeamBId())).withRel("team-b"));
-            created.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
-            created.add(linkTo(methodOn(LocationPlatformController.class).findById(dto.getLocationPlatformId())).withRel("location-platform"));
-        } catch (Exception e) {
-            System.err.println("Erro ao tentar gerar link para recurso relacionado em create Match: " + e.getMessage());
+        // Links para recursos relacionados (Teams, Tournament, LocationPlatform) - Agora usamos os IDs do DTO de resposta
+        if (created.getTeamAId() != null) {
+            created.add(linkTo(methodOn(TeamController.class).getTeamById(created.getTeamAId())).withRel("team-a"));
+        }
+        if (created.getTeamBId() != null) {
+            created.add(linkTo(methodOn(TeamController.class).getTeamById(created.getTeamBId())).withRel("team-b"));
+        }
+        if (created.getTournamentId() != null) {
+            created.add(linkTo(methodOn(TournamentController.class).getTournamentById(created.getTournamentId())).withRel("tournament"));
+        }
+        if (created.getLocationPlatformId() != null) {
+            created.add(linkTo(methodOn(LocationPlatformController.class).findById(created.getLocationPlatformId())).withRel("location-platform"));
         }
 
-        return ResponseEntity.ok(created);
+        // Retorna com o status 201 Created
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -57,15 +63,19 @@ public class MatchController {
         response.add(linkTo(methodOn(MatchController.class).deleteById(id)).withRel("delete"));
         
         // Links para recursos relacionados (Teams, Tournament, LocationPlatform)
-        // Se MatchResponseDTO não expõe os IDs diretamente, é necessário ajustar o DTO ou o serviço
-        // para obter esses IDs para a criação dos links HATEOAS.
-        /*
-        if (response.getTeamAId() != null) { // Exemplo: se TeamAId estivesse no DTO de resposta
-            try {
-                response.add(linkTo(methodOn(TeamController.class).getTeamById(response.getTeamAId())).withRel("team-a"));
-            } catch (Exception e) { }
+        if (response.getTeamAId() != null) {
+            response.add(linkTo(methodOn(TeamController.class).getTeamById(response.getTeamAId())).withRel("team-a"));
         }
-        */
+        if (response.getTeamBId() != null) {
+            response.add(linkTo(methodOn(TeamController.class).getTeamById(response.getTeamBId())).withRel("team-b"));
+        }
+        if (response.getTournamentId() != null) {
+            response.add(linkTo(methodOn(TournamentController.class).getTournamentById(response.getTournamentId())).withRel("tournament"));
+        }
+        if (response.getLocationPlatformId() != null) {
+            response.add(linkTo(methodOn(LocationPlatformController.class).findById(response.getLocationPlatformId())).withRel("location-platform"));
+        }
+
 
         return ResponseEntity.ok(response);
     }
@@ -79,6 +89,18 @@ public class MatchController {
             match.add(linkTo(methodOn(MatchController.class).findById(match.getId())).withSelfRel());
             match.add(linkTo(methodOn(MatchController.class).deleteById(match.getId())).withRel("delete"));
             // Adicionar links para recursos relacionados individualmente, se os IDs estiverem disponíveis no DTO
+            if (match.getTeamAId() != null) {
+                match.add(linkTo(methodOn(TeamController.class).getTeamById(match.getTeamAId())).withRel("team-a"));
+            }
+            if (match.getTeamBId() != null) {
+                match.add(linkTo(methodOn(TeamController.class).getTeamById(match.getTeamBId())).withRel("team-b"));
+            }
+            if (match.getTournamentId() != null) {
+                match.add(linkTo(methodOn(TournamentController.class).getTournamentById(match.getTournamentId())).withRel("tournament"));
+            }
+            if (match.getLocationPlatformId() != null) {
+                match.add(linkTo(methodOn(LocationPlatformController.class).findById(match.getLocationPlatformId())).withRel("location-platform"));
+            }
         }
         Link selfLink = linkTo(methodOn(MatchController.class).findAll()).withSelfRel();
         return ResponseEntity.ok(CollectionModel.of(list, selfLink));

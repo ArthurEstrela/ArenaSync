@@ -10,19 +10,20 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-import io.swagger.v3.oas.annotations.Operation; // Importe esta anotação
-import io.swagger.v3.oas.annotations.tags.Tag; // Importe esta anotação
-import io.swagger.v3.oas.annotations.Parameter; // Importe esta anotação para documentar PathVariable
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @RestController
 @RequestMapping("/api/enrollments")
-@Tag(name = "Enrollment Management", description = "Operações para gerenciar inscrições de times em torneios") // Anotação na classe
+@Tag(name = "Enrollment Management", description = "Operações para gerenciar inscrições de times em torneios")
 public class EnrollmentController {
 
     @Autowired
@@ -36,15 +37,16 @@ public class EnrollmentController {
         savedEnrollment.add(linkTo(methodOn(EnrollmentController.class).getEnrollmentById(savedEnrollment.getId())).withSelfRel());
         savedEnrollment.add(linkTo(methodOn(EnrollmentController.class).getAllEnrollments()).withRel("all-enrollments"));
 
-        // Links para recursos relacionados (Team, Tournament)
-        try {
-            savedEnrollment.add(linkTo(methodOn(TeamController.class).getTeamById(dto.getTeamId())).withRel("team"));
-            savedEnrollment.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
-        } catch (Exception e) {
-            System.err.println("Erro ao tentar gerar link para recurso relacionado em createEnrollment: " + e.getMessage());
+        // Links para recursos relacionados (Team, Tournament) - Agora usamos os IDs do DTO de resposta
+        if (savedEnrollment.getTeamId() != null) {
+            savedEnrollment.add(linkTo(methodOn(TeamController.class).getTeamById(savedEnrollment.getTeamId())).withRel("team"));
+        }
+        if (savedEnrollment.getTournamentId() != null) {
+            savedEnrollment.add(linkTo(methodOn(TournamentController.class).getTournamentById(savedEnrollment.getTournamentId())).withRel("tournament"));
         }
 
-        return ResponseEntity.ok(savedEnrollment);
+        // Retorna com o status 201 Created
+        return new ResponseEntity<>(savedEnrollment, HttpStatus.CREATED);
     }
 
     // 🔹 Buscar inscrição por ID
@@ -58,19 +60,12 @@ public class EnrollmentController {
         dto.add(linkTo(methodOn(EnrollmentController.class).deleteEnrollment(id)).withRel("delete"));
         
         // Links para recursos relacionados (Team, Tournament)
-        // Se EnrollmentResponseDTO tivesse os IDs do time e torneio, você poderia adicionar os links aqui.
-        /*
-        if (dto.getTeamId() != null) { // Exemplo: se TeamId estivesse no DTO de resposta
-            try {
-                dto.add(linkTo(methodOn(TeamController.class).getTeamById(dto.getTeamId())).withRel("team"));
-            } catch (Exception e) { }
+        if (dto.getTeamId() != null) {
+            dto.add(linkTo(methodOn(TeamController.class).getTeamById(dto.getTeamId())).withRel("team"));
         }
-        if (dto.getTournamentId() != null) { // Exemplo: se TournamentId estivesse no DTO de resposta
-            try {
-                dto.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
-            } catch (Exception e) { }
+        if (dto.getTournamentId() != null) {
+            dto.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
         }
-        */
 
         return ResponseEntity.ok(dto);
     }
@@ -79,12 +74,18 @@ public class EnrollmentController {
     @GetMapping
     @Operation(summary = "Listar todas as inscrições", description = "Retorna uma lista de todas as inscrições registradas")
     public ResponseEntity<CollectionModel<EnrollmentResponseDTO>> getAllEnrollments() {
-        List<EnrollmentResponseDTO> list = enrollmentService.findAll(); // Assume que EnrollmentService.findAll() existe
+        List<EnrollmentResponseDTO> list = enrollmentService.findAll();
         
         for (EnrollmentResponseDTO enrollment : list) {
             enrollment.add(linkTo(methodOn(EnrollmentController.class).getEnrollmentById(enrollment.getId())).withSelfRel());
             enrollment.add(linkTo(methodOn(EnrollmentController.class).deleteEnrollment(enrollment.getId())).withRel("delete"));
             // Adicionar outros links relevantes para cada item, se necessário (team, tournament)
+            if (enrollment.getTeamId() != null) {
+                enrollment.add(linkTo(methodOn(TeamController.class).getTeamById(enrollment.getTeamId())).withRel("team"));
+            }
+            if (enrollment.getTournamentId() != null) {
+                enrollment.add(linkTo(methodOn(TournamentController.class).getTournamentById(enrollment.getTournamentId())).withRel("tournament"));
+            }
         }
         Link selfLink = linkTo(methodOn(EnrollmentController.class).getAllEnrollments()).withSelfRel();
         return ResponseEntity.ok(CollectionModel.of(list, selfLink));

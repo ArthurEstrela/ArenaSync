@@ -85,7 +85,7 @@ public class TournamentServiceTest {
             return saved;
         });
 
-        TournamentResponseDTO responseDTO = tournamentService.createTournament(organizerId, tournamentRequestDTO);
+        TournamentResponseDTO responseDTO = tournamentService.saveTournament(organizerId, tournamentRequestDTO);
 
         assertNotNull(responseDTO);
         assertEquals(tournamentRequestDTO.getName(), responseDTO.getName());
@@ -100,7 +100,7 @@ public class TournamentServiceTest {
         when(organizerRepository.findById(organizerId)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            tournamentService.createTournament(organizerId, tournamentRequestDTO);
+            tournamentService.saveTournament(organizerId, tournamentRequestDTO);
         });
 
         verify(organizerRepository, times(1)).findById(organizerId);
@@ -116,7 +116,7 @@ public class TournamentServiceTest {
 
 
         assertThrows(BusinessException.class, () -> {
-            tournamentService.createTournament(organizerId, tournamentRequestDTO);
+            tournamentService.saveTournament(organizerId, tournamentRequestDTO);
         });
         verify(organizerRepository, times(1)).findById(organizerId);
         verify(tournamentRepository, never()).save(any(Tournament.class));

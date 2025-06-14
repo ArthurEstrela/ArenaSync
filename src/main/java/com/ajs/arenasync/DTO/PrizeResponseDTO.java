@@ -13,6 +13,9 @@ public class PrizeResponseDTO extends RepresentationModel<PrizeResponseDTO> {
     @Schema(description = "ID único do prêmio", example = "1")
     private Long id;
 
+    @Schema(description = "ID do torneio ao qual este prêmio pertence", example = "1") // Adicionado tournamentId
+    private Long tournamentId;
+
     @Schema(description = "Descrição do prêmio", example = "Troféu de Ouro")
     private String description;
 
@@ -28,6 +31,15 @@ public class PrizeResponseDTO extends RepresentationModel<PrizeResponseDTO> {
     public void setId(Long id) {
         this.id = id;
     }
+
+    // Novo getter e setter para tournamentId
+    public Long getTournamentId() {
+        return tournamentId;
+    }
+    public void setTournamentId(Long tournamentId) {
+        this.tournamentId = tournamentId;
+    }
+
     public String getDescription() {
         return description;
     }

@@ -19,6 +19,9 @@ public class PlayerResponseDTO extends RepresentationModel<PlayerResponseDTO>{
     @Schema(description = "Endereço de e-mail do jogador", example = "lionel.messi@example.com")
     private String email;
 
+    @Schema(description = "Posição do jogador (se aplicável)", example = "Atacante")
+    private String position; // Adicionado o campo position no DTO de resposta
+
     @Schema(description = "Nome do time ao qual o jogador pertence (será nulo se for agente livre)", example = "Paris Saint-Germain")
     private String teamName; // Pode ser null se for agente livre
 
@@ -45,6 +48,15 @@ public class PlayerResponseDTO extends RepresentationModel<PlayerResponseDTO>{
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    // Getter e Setter para position
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public String getTeamName() {

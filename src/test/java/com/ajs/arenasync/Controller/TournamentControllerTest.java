@@ -77,7 +77,7 @@ public class TournamentControllerTest {
 
     @Test
     void createTournament_Success() throws Exception {
-        when(tournamentService.createTournament(anyLong(), any(TournamentRequestDTO.class))).thenReturn(tournamentResponseDTO);
+        when(tournamentService.saveTournament(anyLong(), any(TournamentRequestDTO.class))).thenReturn(tournamentResponseDTO);
 
         mockMvc.perform(post("/api/tournaments/organizer/{organizerId}", organizerId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +98,7 @@ public class TournamentControllerTest {
     
     @Test
     void createTournament_ServiceThrowsResourceNotFound_Organizer() throws Exception {
-        when(tournamentService.createTournament(anyLong(), any(TournamentRequestDTO.class)))
+        when(tournamentService.saveTournament(anyLong(), any(TournamentRequestDTO.class)))
             .thenThrow(new ResourceNotFoundException("Organizer", organizerId));
 
         mockMvc.perform(post("/api/tournaments/organizer/{organizerId}", organizerId)
@@ -109,7 +109,7 @@ public class TournamentControllerTest {
 
     @Test
     void createTournament_ServiceThrowsBusinessException_DateValidation() throws Exception {
-        when(tournamentService.createTournament(anyLong(), any(TournamentRequestDTO.class)))
+        when(tournamentService.saveTournament(anyLong(), any(TournamentRequestDTO.class)))
             .thenThrow(new BusinessException("A data de término deve ser posterior ou igual à data de início."));
 
         mockMvc.perform(post("/api/tournaments/organizer/{organizerId}", organizerId)

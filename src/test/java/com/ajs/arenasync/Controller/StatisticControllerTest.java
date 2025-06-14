@@ -48,6 +48,7 @@ public class StatisticControllerTest {
         statisticRequestDTO.setGamesPlayed(10);
         statisticRequestDTO.setWins(5);
         statisticRequestDTO.setScore(100);
+        statisticRequestDTO.setAssists(10); // Adicionado para teste
 
         statisticResponseDTO = new StatisticResponseDTO();
         statisticResponseDTO.setId(statisticId);
@@ -55,6 +56,7 @@ public class StatisticControllerTest {
         statisticResponseDTO.setGamesPlayed(10);
         statisticResponseDTO.setWins(5);
         statisticResponseDTO.setScore(100);
+        statisticResponseDTO.setAssists(10); // Adicionado para teste
     }
 
     @Test
@@ -65,7 +67,8 @@ public class StatisticControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(statisticRequestDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())));
+                .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())))
+                .andExpect(jsonPath("$.assists", is(statisticResponseDTO.getAssists()))); // Verifica assists
     }
 
     @Test
@@ -98,7 +101,8 @@ public class StatisticControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$.id", is(statisticId.intValue())))
-                .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())));
+                .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())))
+                .andExpect(jsonPath("$.assists", is(statisticResponseDTO.getAssists()))); // Verifica assists
     }
 
     @Test
@@ -117,7 +121,8 @@ public class StatisticControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(statisticRequestDTO)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())));
+                .andExpect(jsonPath("$.playerName", is(statisticResponseDTO.getPlayerName())))
+                .andExpect(jsonPath("$.assists", is(statisticResponseDTO.getAssists()))); // Verifica assists
     }
     
     @Test
@@ -155,7 +160,8 @@ public class StatisticControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$._embedded.statisticResponseDTOList", hasSize(1)))
-                .andExpect(jsonPath("$._embedded.statisticResponseDTOList[0].playerName", is(statisticResponseDTO.getPlayerName())));
+                .andExpect(jsonPath("$._embedded.statisticResponseDTOList[0].playerName", is(statisticResponseDTO.getPlayerName())))
+                .andExpect(jsonPath("$._embedded.statisticResponseDTOList[0].assists", is(statisticResponseDTO.getAssists()))); // Verifica assists
     }
 
     @Test

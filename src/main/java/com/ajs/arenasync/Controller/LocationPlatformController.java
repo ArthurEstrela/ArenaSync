@@ -57,7 +57,7 @@ public class LocationPlatformController {
     @Operation(summary = "Criar novo local/plataforma", description = "Cria um novo local ou plataforma no sistema")
     public ResponseEntity<LocationPlatformResponseDTO> create(
             @Valid @RequestBody LocationPlatformRequestDTO dto) {
-        LocationPlatformResponseDTO created = locationPlatformService.create(dto);
+        LocationPlatformResponseDTO created = locationPlatformService.save(dto);
         if (created != null) {
             created.add(linkTo(methodOn(LocationPlatformController.class).findById(created.getId())).withSelfRel());
             created.add(linkTo(methodOn(LocationPlatformController.class).findAll()).withRel("all-locations-platforms"));

@@ -92,6 +92,12 @@ public class MatchService {
     private MatchResponseDTO toResponseDTO(Match match) {
         MatchResponseDTO dto = new MatchResponseDTO();
         dto.setId(match.getId());
+        // Popula os IDs no DTO de resposta
+        dto.setTeamAId(match.getTeamA().getId());
+        dto.setTeamBId(match.getTeamB().getId());
+        dto.setTournamentId(match.getTournament().getId());
+        dto.setLocationPlatformId(match.getLocationPlatform().getId());
+
         dto.setTeamAName(match.getTeamA().getName());
         dto.setTeamBName(match.getTeamB().getName());
         dto.setTournamentName(match.getTournament().getName());

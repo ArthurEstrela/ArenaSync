@@ -89,7 +89,7 @@ public class UserServiceTest {
         // Configura o mock para o save
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserResponseDTO responseDTO = userService.createUser(userRequestDTO);
+        UserResponseDTO responseDTO = userService.saveUser(userRequestDTO);
 
         assertNotNull(responseDTO);
         assertEquals(userRequestDTO.getName(), responseDTO.getName());
@@ -103,7 +103,7 @@ public class UserServiceTest {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         assertThrows(BusinessException.class, () -> {
-            userService.createUser(userRequestDTO);
+            userService.saveUser(userRequestDTO);
         });
 
         verify(userRepository, times(1)).existsByEmail(userRequestDTO.getEmail());

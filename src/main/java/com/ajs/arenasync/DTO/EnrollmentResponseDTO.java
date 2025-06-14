@@ -13,6 +13,12 @@ public class EnrollmentResponseDTO extends RepresentationModel<EnrollmentRespons
     @Schema(description = "ID único da inscrição", example = "1")
     private Long id;
 
+    @Schema(description = "ID do time inscrito", example = "1") // Adicionado teamId
+    private Long teamId;
+
+    @Schema(description = "ID do torneio da inscrição", example = "101") // Adicionado tournamentId
+    private Long tournamentId;
+
     @Schema(description = "Nome do time inscrito", example = "Time Titans")
     private String teamName;
 
@@ -28,6 +34,21 @@ public class EnrollmentResponseDTO extends RepresentationModel<EnrollmentRespons
     public void setId(Long id) {
         this.id = id;
     }
+
+    // Novos getters e setters para teamId e tournamentId
+    public Long getTeamId() {
+        return teamId;
+    }
+    public void setTeamId(Long teamId) {
+        this.teamId = teamId;
+    }
+    public Long getTournamentId() {
+        return tournamentId;
+    }
+    public void setTournamentId(Long tournamentId) {
+        this.tournamentId = tournamentId;
+    }
+
     public String getTeamName() {
         return teamName;
     }

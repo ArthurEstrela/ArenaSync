@@ -9,8 +9,7 @@ import com.ajs.arenasync.Entities.Review;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
-
     boolean existsByUserIdAndMatchId(Long userId, Long matchId);
+
+    boolean existsByUserIdAndTournamentId(Long userId, Long tournamentId);
 }
-
-

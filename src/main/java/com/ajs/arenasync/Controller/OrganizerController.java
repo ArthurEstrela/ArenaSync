@@ -58,7 +58,7 @@ public class OrganizerController {
     @Operation(summary = "Criar novo organizador", description = "Cria um novo organizador no sistema")
     public ResponseEntity<OrganizerResponseDTO> createOrganizer(
             @Valid @RequestBody OrganizerRequestDTO dto) {
-        OrganizerResponseDTO created = organizerService.createOrganizer(dto);
+        OrganizerResponseDTO created = organizerService.saveOrganizer(dto);
         created.add(linkTo(methodOn(OrganizerController.class).getOrganizerById(created.getId())).withSelfRel());
         created.add(linkTo(methodOn(OrganizerController.class).getAllOrganizers()).withRel("all-organizers"));
         created.add(linkTo(methodOn(OrganizerController.class).updateOrganizer(created.getId(),  new OrganizerRequestDTO())).withRel("update"));

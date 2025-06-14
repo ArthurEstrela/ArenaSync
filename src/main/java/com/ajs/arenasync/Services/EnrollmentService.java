@@ -81,6 +81,10 @@ public class EnrollmentService {
     public EnrollmentResponseDTO toResponseDTO(Enrollment enrollment) {
         EnrollmentResponseDTO dto = new EnrollmentResponseDTO();
         dto.setId(enrollment.getId());
+        // Popula os IDs no DTO de resposta
+        dto.setTeamId(enrollment.getTeam().getId());
+        dto.setTournamentId(enrollment.getTournament().getId());
+        
         dto.setTeamName(enrollment.getTeam().getName());
         dto.setTournamentName(enrollment.getTournament().getName());
         dto.setStatus(enrollment.getStatus().name());

@@ -100,7 +100,7 @@ public class OrganizerServiceTest {
             return saved;
         });
 
-        OrganizerResponseDTO responseDTO = organizerService.createOrganizer(organizerRequestDTO);
+        OrganizerResponseDTO responseDTO = organizerService.saveOrganizer(organizerRequestDTO);
 
         assertNotNull(responseDTO);
         assertEquals(organizerRequestDTO.getName(), responseDTO.getName());
@@ -114,7 +114,7 @@ public class OrganizerServiceTest {
         when(organizerRepository.findByEmail(anyString())).thenReturn(Optional.of(organizer)); // Email já existe
 
         assertThrows(BusinessException.class, () -> {
-            organizerService.createOrganizer(organizerRequestDTO);
+            organizerService.saveOrganizer(organizerRequestDTO);
         });
         verify(organizerRepository, times(1)).findByEmail(organizerRequestDTO.getEmail());
         verify(organizerRepository, never()).existsByPhoneNumber(anyString());
@@ -127,7 +127,7 @@ public class OrganizerServiceTest {
         when(organizerRepository.existsByPhoneNumber(anyString())).thenReturn(true); // Telefone já existe
 
         assertThrows(BusinessException.class, () -> {
-            organizerService.createOrganizer(organizerRequestDTO);
+            organizerService.saveOrganizer(organizerRequestDTO);
         });
         verify(organizerRepository, times(1)).findByEmail(organizerRequestDTO.getEmail());
         verify(organizerRepository, times(1)).existsByPhoneNumber(organizerRequestDTO.getPhoneNumber());

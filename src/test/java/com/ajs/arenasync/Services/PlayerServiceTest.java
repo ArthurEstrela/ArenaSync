@@ -53,11 +53,13 @@ public class PlayerServiceTest {
         player.setId(playerId);
         player.setName("Test Player");
         player.setEmail("test@example.com");
+        player.setPosition("Goleiro"); // Adicionado para teste
         // player.setTeam(team); // Associar nos testes específicos se necessário
 
         playerRequestDTO = new PlayerRequestDTO();
         playerRequestDTO.setName("Test Player DTO");
         playerRequestDTO.setEmail("testdto@example.com");
+        playerRequestDTO.setPosition("Atacante"); // Adicionado para teste
         // playerRequestDTO.setTeamId(teamId); // Associar nos testes específicos
     }
 
@@ -68,6 +70,7 @@ public class PlayerServiceTest {
         when(playerRepository.save(any(Player.class))).thenAnswer(invocation -> {
             Player saved = invocation.getArgument(0);
             saved.setId(playerId); // Simula ID
+            saved.setPosition(playerRequestDTO.getPosition()); // Garante que a posição é salva no mock
             return saved;
         });
 
@@ -75,6 +78,7 @@ public class PlayerServiceTest {
 
         assertNotNull(responseDTO);
         assertEquals(playerRequestDTO.getName(), responseDTO.getName());
+        assertEquals(playerRequestDTO.getPosition(), responseDTO.getPosition()); // Verifica a posição
         assertNull(responseDTO.getTeamName()); // Sem time
         verify(playerRepository, times(1)).existsByEmail(playerRequestDTO.getEmail());
         verify(playerRepository, times(1)).save(any(Player.class));
@@ -90,6 +94,7 @@ public class PlayerServiceTest {
             Player saved = invocation.getArgument(0);
             saved.setId(playerId);
             saved.setTeam(team); // Simula associação do time
+            saved.setPosition(playerRequestDTO.getPosition()); // Garante que a posição é salva no mock
             return saved;
         });
 
@@ -97,6 +102,7 @@ public class PlayerServiceTest {
 
         assertNotNull(responseDTO);
         assertEquals(playerRequestDTO.getName(), responseDTO.getName());
+        assertEquals(playerRequestDTO.getPosition(), responseDTO.getPosition()); // Verifica a posição
         assertEquals(team.getName(), responseDTO.getTeamName());
         verify(playerRepository, times(1)).existsByEmail(playerRequestDTO.getEmail());
         verify(teamRepository, times(1)).findById(teamId);
@@ -132,12 +138,14 @@ public class PlayerServiceTest {
     @Test
     void testFindById_Success() {
         player.setTeam(team); // Para testar o getTeamName no DTO
+        player.setPosition("Central"); // Garante que a posição está definida para o mock
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
 
         PlayerResponseDTO responseDTO = playerService.findById(playerId);
 
         assertNotNull(responseDTO);
         assertEquals(player.getName(), responseDTO.getName());
+        assertEquals(player.getPosition(), responseDTO.getPosition()); // Verifica a posição
         assertEquals(team.getName(), responseDTO.getTeamName());
         verify(playerRepository, times(1)).findById(playerId);
     }
@@ -145,12 +153,14 @@ public class PlayerServiceTest {
     @Test
     void testFindById_Success_FreeAgent() {
         player.setTeam(null); // Jogador sem time
+        player.setPosition("Free Agent"); // Posição para agente livre
         when(playerRepository.findById(playerId)).thenReturn(Optional.of(player));
 
         PlayerResponseDTO responseDTO = playerService.findById(playerId);
 
         assertNotNull(responseDTO);
         assertEquals(player.getName(), responseDTO.getName());
+        assertEquals(player.getPosition(), responseDTO.getPosition()); // Verifica a posição
         assertNull(responseDTO.getTeamName()); // Nome do time deve ser nulo
         verify(playerRepository, times(1)).findById(playerId);
     }
@@ -172,6 +182,7 @@ public class PlayerServiceTest {
         freeAgent.setId(2L);
         freeAgent.setName("Free Agent Player");
         freeAgent.setEmail("free@example.com");
+        freeAgent.setPosition("Meio-Campo"); // Posição para agente livre
         freeAgent.setTeam(null); // Importante
 
         when(playerRepository.findByTeamIsNull()).thenReturn(Collections.singletonList(freeAgent));
@@ -182,6 +193,7 @@ public class PlayerServiceTest {
         assertFalse(freeAgents.isEmpty());
         assertEquals(1, freeAgents.size());
         assertEquals("Free Agent Player", freeAgents.get(0).getName());
+        assertEquals("Meio-Campo", freeAgents.get(0).getPosition()); // Verifica a posição
         assertNull(freeAgents.get(0).getTeamName());
         verify(playerRepository, times(1)).findByTeamIsNull();
     }
@@ -211,6 +223,7 @@ public class PlayerServiceTest {
     @Test
     void testFindAll() {
         player.setTeam(team);
+        player.setPosition("Zagueiro"); // Adicionado para teste
         when(playerRepository.findAll()).thenReturn(Collections.singletonList(player));
 
         List<PlayerResponseDTO> players = playerService.findAll();
@@ -219,6 +232,7 @@ public class PlayerServiceTest {
         assertFalse(players.isEmpty());
         assertEquals(1, players.size());
         assertEquals(player.getName(), players.get(0).getName());
+        assertEquals(player.getPosition(), players.get(0).getPosition()); // Verifica a posição
         assertEquals(team.getName(), players.get(0).getTeamName());
         verify(playerRepository, times(1)).findAll();
     }

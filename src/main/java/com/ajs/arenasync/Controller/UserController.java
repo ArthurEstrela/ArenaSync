@@ -76,7 +76,7 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Criar novo usuário", description = "Cria um novo usuário no sistema com as informações fornecidas")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO dto) {
-        UserResponseDTO createdUser = userService.createUser(dto);
+        UserResponseDTO createdUser = userService.saveUser(dto);
         createdUser.add(linkTo(methodOn(UserController.class).getUserById(createdUser.getId())).withSelfRel());
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }

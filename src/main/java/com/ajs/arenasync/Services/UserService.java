@@ -57,7 +57,7 @@ public class UserService {
     // allEntries = true no @CacheEvict abaixo para remover o cache de 'allUsers'
     @CachePut(key = "#result.id") // Adiciona o usuário criado ao cache 'users', usando o ID retornado como chave
     @CacheEvict(key = "'allUsers'", allEntries = true) // Limpa o cache da lista completa
-    public UserResponseDTO createUser(UserRequestDTO dto) {
+    public UserResponseDTO saveUser(UserRequestDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new BusinessException("Já existe um usuário com este e-mail.");
         }

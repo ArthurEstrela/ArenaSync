@@ -77,7 +77,7 @@ public class UserControllerTest {
 
     @Test
     void testCreateUser_Success() throws Exception {
-        when(userService.createUser(any(UserRequestDTO.class))).thenReturn(userResponseDTO);
+        when(userService.saveUser(any(UserRequestDTO.class))).thenReturn(userResponseDTO);
 
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +103,7 @@ public class UserControllerTest {
 
     @Test
     void testCreateUser_EmailAlreadyExists() throws Exception {
-        when(userService.createUser(any(UserRequestDTO.class)))
+        when(userService.saveUser(any(UserRequestDTO.class)))
                 .thenThrow(new BusinessException("Já existe um usuário com este e-mail."));
 
         mockMvc.perform(post("/api/users")

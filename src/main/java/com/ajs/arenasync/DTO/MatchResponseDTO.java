@@ -15,6 +15,18 @@ public class MatchResponseDTO extends RepresentationModel<MatchResponseDTO>{
     @Schema(description = "ID único da partida", example = "1")
     private Long id;
 
+    @Schema(description = "ID da Equipe A", example = "1") // Adicionado teamAId
+    private Long teamAId;
+
+    @Schema(description = "ID da Equipe B", example = "2") // Adicionado teamBId
+    private Long teamBId;
+
+    @Schema(description = "ID do Torneio ao qual a partida pertence", example = "101") // Adicionado tournamentId
+    private Long tournamentId;
+
+    @Schema(description = "ID do local ou plataforma onde a partida será realizada", example = "201") // Adicionado locationPlatformId
+    private Long locationPlatformId;
+
     @Schema(description = "Nome da Equipe A", example = "Time Alfa")
     private String teamAName;
 
@@ -42,6 +54,33 @@ public class MatchResponseDTO extends RepresentationModel<MatchResponseDTO>{
     public void setId(Long id) {
         this.id = id;
     }
+
+    // Novos getters e setters para os IDs
+    public Long getTeamAId() {
+        return teamAId;
+    }
+    public void setTeamAId(Long teamAId) {
+        this.teamAId = teamAId;
+    }
+    public Long getTeamBId() {
+        return teamBId;
+    }
+    public void setTeamBId(Long teamBId) {
+        this.teamBId = teamBId;
+    }
+    public Long getTournamentId() {
+        return tournamentId;
+    }
+    public void setTournamentId(Long tournamentId) {
+        this.tournamentId = tournamentId;
+    }
+    public Long getLocationPlatformId() {
+        return locationPlatformId;
+    }
+    public void setLocationPlatformId(Long locationPlatformId) {
+        this.locationPlatformId = locationPlatformId;
+    }
+
     public String getTeamAName() {
         return teamAName;
     }

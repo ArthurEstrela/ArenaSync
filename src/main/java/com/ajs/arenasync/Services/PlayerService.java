@@ -74,6 +74,7 @@ public class PlayerService {
         Player player = new Player();
         player.setName(dto.getName());
         player.setEmail(dto.getEmail());
+        player.setPosition(dto.getPosition()); // Mapeia o campo position
 
         if (dto.getTeamId() != null) {
             Team team = teamRepository.findById(dto.getTeamId())
@@ -90,6 +91,7 @@ public class PlayerService {
         dto.setId(player.getId());
         dto.setName(player.getName());
         dto.setEmail(player.getEmail());
+        dto.setPosition(player.getPosition()); // Mapeia o campo position para o DTO de resposta
         dto.setTeamName(player.getTeam() != null ? player.getTeam().getName() : null);
         return dto;
     }

@@ -37,13 +37,14 @@ public class StatisticController {
             created.add(linkTo(methodOn(StatisticController.class).getStatisticById(created.getId())).withSelfRel());
             
             // Adicionar link para o jogador relacionado
-            if (dto.getPlayerId() != null) {
-                try {
-                    created.add(linkTo(methodOn(PlayerController.class).getPlayerById(dto.getPlayerId())).withRel("player"));
-                } catch (Exception e) {
-                    System.err.println("Erro ao tentar gerar link para player: " + e.getMessage());
-                }
+            if (created.getPlayerId() != null) {
+                created.add(linkTo(methodOn(PlayerController.class).getPlayerById(created.getPlayerId())).withRel("player"));
             }
+            // Adicionar link para a partida relacionada, se houver
+            if (created.getMatchId() != null) {
+                created.add(linkTo(methodOn(MatchController.class).findById(created.getMatchId())).withRel("match"));
+            }
+
             // Adicionar link para a coleção de todas as estatísticas
             created.add(linkTo(methodOn(StatisticController.class).getAllStatistics()).withRel("all-statistics"));
         }
@@ -61,6 +62,14 @@ public class StatisticController {
 
         statistic.add(linkTo(methodOn(StatisticController.class).getAllStatistics()).withRel("all-statistics"));
 
+        // Links para recursos relacionados
+        if (statistic.getPlayerId() != null) {
+            statistic.add(linkTo(methodOn(PlayerController.class).getPlayerById(statistic.getPlayerId())).withRel("player"));
+        }
+        if (statistic.getMatchId() != null) {
+            statistic.add(linkTo(methodOn(MatchController.class).findById(statistic.getMatchId())).withRel("match"));
+        }
+
         return ResponseEntity.ok(statistic);
     }
 
@@ -75,6 +84,14 @@ public class StatisticController {
                 statistic.add(linkTo(methodOn(StatisticController.class).getStatisticById(statistic.getId())).withSelfRel());
                 statistic.add(linkTo(methodOn(StatisticController.class).updateStatistic(statistic.getId(), new StatisticRequestDTO())).withRel("edit"));
                 statistic.add(linkTo(methodOn(StatisticController.class).deleteStatistic(statistic.getId())).withRel("delete"));
+                
+                // Links para recursos relacionados para cada item na lista
+                if (statistic.getPlayerId() != null) {
+                    statistic.add(linkTo(methodOn(PlayerController.class).getPlayerById(statistic.getPlayerId())).withRel("player"));
+                }
+                if (statistic.getMatchId() != null) {
+                    statistic.add(linkTo(methodOn(MatchController.class).findById(statistic.getMatchId())).withRel("match"));
+                }
             }
         }
         Link selfLink = linkTo(methodOn(StatisticController.class).getAllStatistics()).withSelfRel();

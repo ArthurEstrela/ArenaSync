@@ -37,26 +37,14 @@ public class ReviewController {
             created.add(linkTo(methodOn(ReviewController.class).getReviewById(created.getId())).withSelfRel());
             
             // Adicionar link para o usuário que fez a review
-            if (dto.getUserId() != null) {
-                try {
-                    created.add(linkTo(methodOn(UserController.class).getUserById(dto.getUserId())).withRel("user"));
-                } catch (Exception e) {
-                    System.err.println("Erro ao tentar gerar link para user em createReview: " + e.getMessage());
-                }
+            if (created.getUserId() != null) {
+                created.add(linkTo(methodOn(UserController.class).getUserById(created.getUserId())).withRel("user"));
             }
             // Adicionar link para a partida ou torneio avaliado
-            if (dto.getMatchId() != null) {
-                 try {
-                    created.add(linkTo(methodOn(MatchController.class).findById(dto.getMatchId())).withRel("match"));
-                } catch (Exception e) {
-                    System.err.println("Erro ao tentar gerar link para match em createReview: " + e.getMessage());
-                }
-            } else if (dto.getTournamentId() != null) {
-                try {
-                    created.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
-                } catch (Exception e) {
-                    System.err.println("Erro ao tentar gerar link para tournament em createReview: " + e.getMessage());
-                }
+            if (created.getMatchId() != null) {
+                created.add(linkTo(methodOn(MatchController.class).findById(created.getMatchId())).withRel("match"));
+            } else if (created.getTournamentId() != null) {
+                created.add(linkTo(methodOn(TournamentController.class).getTournamentById(created.getTournamentId())).withRel("tournament"));
             }
             created.add(linkTo(methodOn(ReviewController.class).getAllReviews()).withRel("all-reviews"));
         }
@@ -72,6 +60,16 @@ public class ReviewController {
         review.add(linkTo(methodOn(ReviewController.class).getAllReviews()).withRel("all-reviews"));
         review.add(linkTo(methodOn(ReviewController.class).deleteReview(id)).withRel("delete"));
 
+        // Links para recursos relacionados
+        if (review.getUserId() != null) {
+            review.add(linkTo(methodOn(UserController.class).getUserById(review.getUserId())).withRel("user"));
+        }
+        if (review.getMatchId() != null) {
+            review.add(linkTo(methodOn(MatchController.class).findById(review.getMatchId())).withRel("match"));
+        } else if (review.getTournamentId() != null) {
+            review.add(linkTo(methodOn(TournamentController.class).getTournamentById(review.getTournamentId())).withRel("tournament"));
+        }
+        
         return ResponseEntity.ok(review);
     }
 
@@ -85,6 +83,16 @@ public class ReviewController {
             if (review != null) {
                 review.add(linkTo(methodOn(ReviewController.class).getReviewById(review.getId())).withSelfRel());
                 review.add(linkTo(methodOn(ReviewController.class).deleteReview(review.getId())).withRel("delete"));
+
+                // Links para recursos relacionados para cada item na lista
+                if (review.getUserId() != null) {
+                    review.add(linkTo(methodOn(UserController.class).getUserById(review.getUserId())).withRel("user"));
+                }
+                if (review.getMatchId() != null) {
+                    review.add(linkTo(methodOn(MatchController.class).findById(review.getMatchId())).withRel("match"));
+                } else if (review.getTournamentId() != null) {
+                    review.add(linkTo(methodOn(TournamentController.class).getTournamentById(review.getTournamentId())).withRel("tournament"));
+                }
             }
         }
         Link selfLink = linkTo(methodOn(ReviewController.class).getAllReviews()).withSelfRel();

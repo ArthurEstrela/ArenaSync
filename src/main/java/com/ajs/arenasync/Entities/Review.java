@@ -81,6 +81,14 @@ public class Review implements Serializable {
         this.match = match;
     }
 
+    public Tournament getTournament() {
+        return tournament;
+    }
+
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
+    }
+
     @Override
     public int hashCode() {
         return (id == null) ? 0 : id.hashCode();

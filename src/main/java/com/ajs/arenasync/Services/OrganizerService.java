@@ -36,7 +36,7 @@ public class OrganizerService {
     }
 
     @CacheEvict(allEntries = true)
-    public OrganizerResponseDTO createOrganizer(OrganizerRequestDTO dto) {
+    public OrganizerResponseDTO saveOrganizer(OrganizerRequestDTO dto) {
         if (organizerRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new BusinessException("Já existe um organizador com este e-mail.");
         }

@@ -35,13 +35,9 @@ public class PrizeController {
         // CORREÇÃO AQUI: Adiciona verificação de nulidade antes de adicionar links HATEOAS
         if (created != null) {
             created.add(linkTo(methodOn(PrizeController.class).getPrizeById(created.getId())).withSelfRel());
-            // Adicionar link para o torneio relacionado
-            if (dto.getTournamentId() != null) {
-                try {
-                    created.add(linkTo(methodOn(TournamentController.class).getTournamentById(dto.getTournamentId())).withRel("tournament"));
-                } catch (Exception e) {
-                     System.err.println("Erro ao tentar gerar link para tournament em createPrize: " + e.getMessage());
-                }
+            // Adicionar link para o torneio relacionado - Agora usamos o ID do DTO de resposta
+            if (created.getTournamentId() != null) {
+                created.add(linkTo(methodOn(TournamentController.class).getTournamentById(created.getTournamentId())).withRel("tournament"));
             }
             created.add(linkTo(methodOn(PrizeController.class).getAllPrizes()).withRel("all-prizes"));
         }
@@ -57,6 +53,11 @@ public class PrizeController {
         prize.add(linkTo(methodOn(PrizeController.class).getAllPrizes()).withRel("all-prizes"));
         prize.add(linkTo(methodOn(PrizeController.class).deletePrize(id)).withRel("delete"));
         
+        // Link para o torneio relacionado
+        if (prize.getTournamentId() != null) {
+            prize.add(linkTo(methodOn(TournamentController.class).getTournamentById(prize.getTournamentId())).withRel("tournament"));
+        }
+        
         return ResponseEntity.ok(prize);
     }
 
@@ -68,6 +69,10 @@ public class PrizeController {
         for (PrizeResponseDTO prize : prizesList) {
             prize.add(linkTo(methodOn(PrizeController.class).getPrizeById(prize.getId())).withSelfRel());
             prize.add(linkTo(methodOn(PrizeController.class).deletePrize(prize.getId())).withRel("delete"));
+            // Link para o torneio relacionado para cada item na lista
+            if (prize.getTournamentId() != null) {
+                prize.add(linkTo(methodOn(TournamentController.class).getTournamentById(prize.getTournamentId())).withRel("tournament"));
+            }
         }
         Link selfLink = linkTo(methodOn(PrizeController.class).getAllPrizes()).withSelfRel();
         CollectionModel<PrizeResponseDTO> collectionModel = CollectionModel.of(prizesList, selfLink);

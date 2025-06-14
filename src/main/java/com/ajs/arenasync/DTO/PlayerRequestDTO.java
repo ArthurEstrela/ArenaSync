@@ -17,6 +17,9 @@ public class PlayerRequestDTO {
     @Schema(description = "Endereço de e-mail do jogador (deve ser único)", example = "lionel.messi@example.com")
     private String email;
 
+    @Schema(description = "Posição do jogador (se aplicável, ex: Atacante, Defensor, Mid Laner)", example = "Atacante")
+    private String position; // Adicionado o campo position
+
     @Schema(description = "ID do time ao qual o jogador pertence (opcional para agentes livres)", example = "10")
     private Long teamId; // Pode ser null para agentes livres
 
@@ -35,6 +38,15 @@ public class PlayerRequestDTO {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    // Getter e Setter para position
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public Long getTeamId() {

@@ -37,7 +37,7 @@ public class TournamentService {
 
     @CacheEvict(key = "'allTournaments'", allEntries = true) // Invalida o cache da lista completa
     @CachePut(key = "#result.id") // Adiciona/atualiza o torneio recém-criado no cache
-    public TournamentResponseDTO createTournament(Long organizerId, TournamentRequestDTO dto) {
+    public TournamentResponseDTO saveTournament(Long organizerId, TournamentRequestDTO dto) {
         Organizer organizer = organizerRepository.findById(organizerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organizer", organizerId)); // Lança ResourceNotFoundException se o organizador não for encontrado
 

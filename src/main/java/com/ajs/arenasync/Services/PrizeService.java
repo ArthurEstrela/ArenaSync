@@ -71,6 +71,8 @@ public class PrizeService {
         dto.setId(prize.getId());
         dto.setDescription(prize.getDescription());
         dto.setValue(prize.getValue());
+        // Popula o ID do torneio no DTO de resposta
+        dto.setTournamentId(prize.getTournament().getId());
         dto.setTournamentName(prize.getTournament().getName());
         return dto;
     }
