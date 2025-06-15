@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.http.HttpStatus; // Importe HttpStatus
 
 @WebMvcTest(MatchController.class)
 public class MatchControllerTest {
@@ -73,7 +74,8 @@ public class MatchControllerTest {
         mockMvc.perform(post("/api/matches")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(matchRequestDTO)))
-                .andExpect(status().isOk())
+                // CORREÇÃO: Mudar para isCreated (201)
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.teamAName", is(matchResponseDTO.getTeamAName())));
     }
 

@@ -11,13 +11,14 @@ import com.ajs.arenasync.Exceptions.ResourceNotFoundException;
 import com.ajs.arenasync.Repositories.MatchRepository;
 import com.ajs.arenasync.Repositories.ReviewRepository;
 import com.ajs.arenasync.Repositories.UserRepository;
-import com.ajs.arenasync.Repositories.TournamentRepository; // Importe TournamentRepository
+import com.ajs.arenasync.Repositories.TournamentRepository; // Injete TournamentRepository
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito; // Importar Mockito
 
 import java.util.Collections;
 import java.util.List;
@@ -107,12 +108,13 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_Success_ForMatch() {
-        // Mocks para save de review de partida
+        // Stubs necessários para este cenário específico
         when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(false);
-        when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false); // Para garantir que não conflita com torneio
+        // Usar lenient para existsByUserIdAndTournamentId, pois ele não será chamado nesta ramificação do if/else if
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false); 
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
-        when(tournamentRepository.findById(anyLong())).thenReturn(Optional.empty()); // Garante que não tenta buscar torneio
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> {
             Review saved = invocation.getArgument(0);
             saved.setId(reviewMatchId);
@@ -125,22 +127,23 @@ public class ReviewServiceTest {
         assertEquals(reviewRequestDTOForMatch.getRating(), responseDTO.getRating());
         assertEquals(user.getName(), responseDTO.getUserName());
         assertTrue(responseDTO.getMatchInfo().contains("Partida ID: " + matchId));
-        assertNull(responseDTO.getTournamentName()); // Deve ser nulo para review de partida
+        assertNull(responseDTO.getTournamentName());
         verify(userRepository, times(1)).findById(userId);
         verify(matchRepository, times(1)).findById(matchId);
-        verify(tournamentRepository, never()).findById(anyLong()); // Não deve chamar findById para torneio
+        verify(tournamentRepository, never()).findById(anyLong()); 
         verify(reviewRepository, times(1)).existsByUserIdAndMatchId(userId, matchId);
-        verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(anyLong(), anyLong()); // Verifica que este também foi chamado
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
         verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
     void testSave_Success_ForTournament() {
-        // Mocks para save de review de torneio
-        when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false); // Para garantir que não conflita com partida
+        // Stubs necessários para este cenário específico
+        // Usar lenient para existsByUserIdAndMatchId, pois ele não será chamado nesta ramificação do if/else if
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false); 
         when(reviewRepository.existsByUserIdAndTournamentId(userId, tournamentId)).thenReturn(false);
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(matchRepository.findById(anyLong())).thenReturn(Optional.empty()); // Garante que não tenta buscar partida
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.of(tournament));
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> {
             Review saved = invocation.getArgument(0);
@@ -153,21 +156,22 @@ public class ReviewServiceTest {
         assertNotNull(responseDTO);
         assertEquals(reviewRequestDTOForTournament.getRating(), responseDTO.getRating());
         assertEquals(user.getName(), responseDTO.getUserName());
-        assertEquals(tournament.getName(), responseDTO.getTournamentName()); // Deve ter o nome do torneio
-        assertNull(responseDTO.getMatchInfo()); // Deve ser nulo para review de torneio
+        assertEquals(tournament.getName(), responseDTO.getTournamentName());
+        assertNull(responseDTO.getMatchInfo());
         verify(userRepository, times(1)).findById(userId);
-        verify(matchRepository, never()).findById(anyLong()); // Não deve chamar findById para partida
+        verify(matchRepository, never()).findById(anyLong()); 
         verify(tournamentRepository, times(1)).findById(tournamentId);
-        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong()); // Verifica que este também foi chamado
+        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong()); 
         verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(userId, tournamentId);
         verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
     void testSave_UserNotFound() {
-        // Mocks
-        when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false); // Para evitar NeverWantedButInvoked
-        when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false); // Para evitar NeverWantedButInvoked
+        // Stubs necessários para este cenário específico (match review, falha no user)
+        when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false);
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false);
+
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         assertThrows(BadRequestException.class, () -> {
@@ -176,16 +180,17 @@ public class ReviewServiceTest {
         verify(userRepository, times(1)).findById(userId);
         verify(matchRepository, never()).findById(anyLong());
         verify(tournamentRepository, never()).findById(anyLong());
-        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong());
-        verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(anyLong(), anyLong());
+        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong()); 
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
     void testSave_MatchNotFound() {
-        // Mocks
+        // Stubs necessários para este cenário específico (match review, falha no match)
         when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false);
-        when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false);
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false);
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(matchRepository.findById(matchId)).thenReturn(Optional.empty());
 
@@ -195,16 +200,18 @@ public class ReviewServiceTest {
         verify(userRepository, times(1)).findById(userId);
         verify(matchRepository, times(1)).findById(matchId);
         verify(tournamentRepository, never()).findById(anyLong());
-        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong());
-        verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(anyLong(), anyLong());
+        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong()); 
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
     void testSave_TournamentNotFound() {
-        // Mocks
-        when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false);
+        // Stubs necessários para este cenário específico (tournament review, falha no tournament)
+        // Usar lenient aqui porque o existsByUserIdAndMatchId não será chamado nesta ramificação (matchId é null)
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false); 
         when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false);
+
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(tournamentRepository.findById(tournamentId)).thenReturn(Optional.empty());
 
@@ -214,8 +221,8 @@ public class ReviewServiceTest {
         verify(userRepository, times(1)).findById(userId);
         verify(matchRepository, never()).findById(anyLong());
         verify(tournamentRepository, times(1)).findById(tournamentId);
-        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong());
-        verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(anyLong(), anyLong());
+        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong()); // Não deve ser chamado
+        verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
@@ -227,8 +234,8 @@ public class ReviewServiceTest {
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTOForMatch);
         });
-        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong()); // Não deve chegar aqui
-        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); // Não deve chegar aqui
+        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong());
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong());
         verify(userRepository, never()).findById(anyLong());
         verify(matchRepository, never()).findById(anyLong());
         verify(tournamentRepository, never()).findById(anyLong());
@@ -252,15 +259,15 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_UserAlreadyReviewedMatch() {
-        // Mocks
+        // Stubs necessários para este cenário específico
         when(reviewRepository.existsByUserIdAndMatchId(userId, matchId)).thenReturn(true);
-        // Não precisa mockar existsByUserIdAndTournamentId se já falha aqui
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false); 
 
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTOForMatch);
         });
         verify(reviewRepository, times(1)).existsByUserIdAndMatchId(userId, matchId);
-        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); // Não deve chamar este
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
         verify(userRepository, never()).findById(userId);
         verify(matchRepository, never()).findById(matchId);
         verify(tournamentRepository, never()).findById(anyLong());
@@ -269,14 +276,15 @@ public class ReviewServiceTest {
 
     @Test
     void testSave_UserAlreadyReviewedTournament() {
-        // Mocks
-        when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false); // Passa na primeira checagem
+        // Stubs necessários para este cenário específico
+        // Usar lenient aqui porque o existsByUserIdAndMatchId não será chamado nesta ramificação (matchId é null)
+        Mockito.lenient().when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false); 
         when(reviewRepository.existsByUserIdAndTournamentId(userId, tournamentId)).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTOForTournament);
         });
-        verify(reviewRepository, times(1)).existsByUserIdAndMatchId(anyLong(), anyLong());
+        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong()); // Não deve ser chamado
         verify(reviewRepository, times(1)).existsByUserIdAndTournamentId(userId, tournamentId);
         verify(userRepository, never()).findById(userId);
         verify(matchRepository, never()).findById(anyLong());
@@ -287,20 +295,40 @@ public class ReviewServiceTest {
     @Test
     void testSave_InvalidRatingTooLow() {
         reviewRequestDTOForMatch.setRating(0);
+        // Stubs necessários para este cenário específico (match review, falha no rating)
+        // REMOÇÃO: Não verificar chamadas a existsByUserIdAndMatchId/TournamentId, pois a validação do rating ocorre antes.
+        // Mockito.lenient().when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false);
+        // Mockito.lenient().when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false);
         
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTOForMatch);
         });
+        // REMOÇÃO: Não verificar chamadas a existsByUserIdAndMatchId/TournamentId
+        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong()); 
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
+        verify(userRepository, never()).findById(anyLong());
+        verify(matchRepository, never()).findById(anyLong());
+        verify(tournamentRepository, never()).findById(anyLong());
         verify(reviewRepository, never()).save(any(Review.class));
     }
 
     @Test
     void testSave_InvalidRatingTooHigh() {
         reviewRequestDTOForMatch.setRating(6);
+        // Stubs necessários para este cenário específico (match review, falha no rating)
+        // REMOÇÃO: Não verificar chamadas a existsByUserIdAndMatchId/TournamentId, pois a validação do rating ocorre antes.
+        // Mockito.lenient().when(reviewRepository.existsByUserIdAndMatchId(anyLong(), anyLong())).thenReturn(false);
+        // Mockito.lenient().when(reviewRepository.existsByUserIdAndTournamentId(anyLong(), anyLong())).thenReturn(false);
         
         assertThrows(BadRequestException.class, () -> {
             reviewService.save(reviewRequestDTOForMatch);
         });
+        // REMOÇÃO: Não verificar chamadas a existsByUserIdAndMatchId/TournamentId
+        verify(reviewRepository, never()).existsByUserIdAndMatchId(anyLong(), anyLong()); 
+        verify(reviewRepository, never()).existsByUserIdAndTournamentId(anyLong(), anyLong()); 
+        verify(userRepository, never()).findById(anyLong());
+        verify(matchRepository, never()).findById(anyLong());
+        verify(tournamentRepository, never()).findById(anyLong());
         verify(reviewRepository, never()).save(any(Review.class));
     }
 

@@ -100,6 +100,8 @@ public class OrganizerService {
         organizer.setOrganizationName(dto.getOrganizationName());
         organizer.setBio(dto.getBio());
         organizer.setSocialLinks(dto.getSocialLinks());
+        organizer.setAge(dto.getAge());       // ADICIONE ESTA LINHA
+        organizer.setPassword(dto.getPassword()); // ADICIONE ESTA LINHA
         return organizer;
     }
 

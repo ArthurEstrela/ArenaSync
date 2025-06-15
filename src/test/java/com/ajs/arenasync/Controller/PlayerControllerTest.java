@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+// Importar nullValue não é mais necessário aqui, pois usaremos doesNotExist()
+// import static org.hamcrest.Matchers.nullValue;
 
 @WebMvcTest(PlayerController.class)
 public class PlayerControllerTest {
@@ -150,7 +152,8 @@ public class PlayerControllerTest {
                 .andExpect(content().contentType(MediaType.parseMediaType("application/hal+json")))
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList", hasSize(1)))
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].name", is("Free Agent")))
-                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].position").isEmpty()) // Verifica que está vazio
+                // CORREÇÃO: Usar .doesNotExist() para verificar a ausência do campo 'position'
+                .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].position").doesNotExist()) 
                 .andExpect(jsonPath("$._embedded.playerResponseDTOList[0].teamName").doesNotExist());
     }
 

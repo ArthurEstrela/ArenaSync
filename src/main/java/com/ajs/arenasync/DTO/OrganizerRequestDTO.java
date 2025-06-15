@@ -1,15 +1,27 @@
 package com.ajs.arenasync.DTO;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min; // Importado para validação de idade
 import jakarta.validation.constraints.NotNull;
-import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
+import jakarta.validation.constraints.Size; // Importado para validação de senha
+import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Detalhes para a criação ou atualização de um organizador") // Anotação na classe do DTO
+@Schema(description = "Detalhes para a criação ou atualização de um organizador")
 public class OrganizerRequestDTO {
 
     @NotNull(message = "O nome é obrigatório.")
     @Schema(description = "Nome do organizador", example = "Empresa Eventos Ltda.")
     private String name;
+
+    @NotNull(message = "A idade é obrigatória.")
+    @Min(value = 1, message = "A idade deve ser um valor positivo.")
+    @Schema(description = "Idade do organizador", example = "35")
+    private Integer age; // Campo 'age' adicionado, herdado de User
+
+    @NotNull(message = "A senha é obrigatória.")
+    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
+    @Schema(description = "Senha do organizador (mínimo 6 caracteres)", example = "senha@organizacao")
+    private String password; // Campo 'password' adicionado, herdado de User
 
     @NotNull(message = "O e-mail é obrigatório.")
     @Email(message = "E-mail inválido.")
@@ -31,12 +43,29 @@ public class OrganizerRequestDTO {
     private String socialLinks;
 
     // Getters e Setters
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getEmail() {

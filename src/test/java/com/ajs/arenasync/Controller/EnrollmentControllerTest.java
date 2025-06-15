@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.http.HttpStatus; // Importe HttpStatus
 
 @WebMvcTest(EnrollmentController.class)
 public class EnrollmentControllerTest {
@@ -62,7 +63,8 @@ public class EnrollmentControllerTest {
         mockMvc.perform(post("/api/enrollments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isOk())
+                // CORREÇÃO: Mudar para isCreated (201)
+                .andExpect(status().isCreated()) 
                 .andExpect(jsonPath("$.teamName", is(responseDTO.getTeamName())));
     }
 

@@ -23,8 +23,8 @@ public class LocationPlatformService {
 
     @CacheEvict(allEntries = true)
     public LocationPlatformResponseDTO save(LocationPlatformRequestDTO dto) {
-        if (locationPlatformRepository.findAll().stream()
-                .anyMatch(lp -> lp.getName().equalsIgnoreCase(dto.getName()))) {
+        // CORREÇÃO: Usar existsByNameIgnoreCase diretamente
+        if (locationPlatformRepository.existsByNameIgnoreCase(dto.getName())) {
             throw new BusinessException("Já existe um local/plataforma com esse nome.");
         }
 
@@ -57,9 +57,9 @@ public class LocationPlatformService {
         LocationPlatform existing = locationPlatformRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Local/Plataforma", id));
 
+        // CORREÇÃO: Usar existsByNameIgnoreCaseAndIdNot diretamente
         if (!existing.getName().equalsIgnoreCase(dto.getName()) &&
-            locationPlatformRepository.findAll().stream()
-                .anyMatch(lp -> lp.getName().equalsIgnoreCase(dto.getName()))) {
+            locationPlatformRepository.existsByNameIgnoreCaseAndIdNot(dto.getName(), id)) {
             throw new BusinessException("Já existe um local/plataforma com esse nome.");
         }
 

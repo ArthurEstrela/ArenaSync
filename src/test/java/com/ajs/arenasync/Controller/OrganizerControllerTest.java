@@ -49,6 +49,10 @@ public class OrganizerControllerTest {
         organizerRequestDTO.setOrganizationName("Arena Corp Inc.");
         organizerRequestDTO.setBio("We organize events.");
         organizerRequestDTO.setSocialLinks("linkedin.com/arenacorp");
+        // ESSES CAMPOS FORAM ADICIONADOS AO DTO E SÃO OBRIGATÓRIOS.
+        organizerRequestDTO.setAge(30);
+        organizerRequestDTO.setPassword("senha123");
+
 
         organizerResponseDTO = new OrganizerResponseDTO();
         organizerResponseDTO.setId(organizerId);
@@ -58,6 +62,9 @@ public class OrganizerControllerTest {
         organizerResponseDTO.setOrganizationName("Arena Corp Inc.");
         organizerResponseDTO.setBio("We organize events.");
         organizerResponseDTO.setSocialLinks("linkedin.com/arenacorp");
+        // O DTO de resposta também deve ter 'age' para consistência nos asserts,
+        // mas não tem 'password' por segurança.
+        organizerResponseDTO.setAge(30);
     }
 
     @Test

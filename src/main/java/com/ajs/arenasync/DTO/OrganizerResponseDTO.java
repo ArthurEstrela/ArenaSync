@@ -4,10 +4,10 @@ import org.springframework.hateoas.RepresentationModel;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-import io.swagger.v3.oas.annotations.media.Schema; // Importe esta anotação
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonInclude(Include.NON_NULL)
-@Schema(description = "Detalhes do organizador retornado pela API") // Anotação na classe do DTO
+@Schema(description = "Detalhes do organizador retornado pela API")
 public class OrganizerResponseDTO extends RepresentationModel<OrganizerResponseDTO>{
 
     @Schema(description = "ID único do organizador", example = "1")
@@ -15,6 +15,9 @@ public class OrganizerResponseDTO extends RepresentationModel<OrganizerResponseD
 
     @Schema(description = "Nome do organizador", example = "Empresa Eventos Ltda.")
     private String name;
+
+    @Schema(description = "Idade do organizador", example = "35")
+    private Integer age; // Campo 'age' herdado de User
 
     @Schema(description = "Endereço de e-mail do organizador", example = "contato@empresaeventos.com")
     private String email;
@@ -46,6 +49,14 @@ public class OrganizerResponseDTO extends RepresentationModel<OrganizerResponseD
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
     }
 
     public String getEmail() {
